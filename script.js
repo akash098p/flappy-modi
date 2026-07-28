@@ -16,9 +16,9 @@
   ];
 
   const VEHICLES = [
-    { id: "flappy1", name: "Rickshaw", cost: 0,   img: "images/flappy1.png" },
-    { id: "flappy2", name: "Scooter",  cost: 80,  img: "images/flappy2.png" },
-    { id: "flappy3", name: "Cycle",    cost: 150, img: "images/flappy3.png" },
+    { id: "flappy1", name: "Wing", cost: 0,   img: "images/flappy1.png" },
+    { id: "flappy2", name: "Helicopter",  cost: 80,  img: "images/flappy2.png" },
+    { id: "flappy3", name: "Tejas",    cost: 150, img: "images/flappy3.png" },
   ];
 
   const GRAVITY = 1500;         // px/s^2
