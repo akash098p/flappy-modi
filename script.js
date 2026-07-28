@@ -317,12 +317,28 @@
     playSound(audioJump);
   }
 
+  // Keep the canvas listener for compatibility with desktop pointer/mouse input
   canvas.addEventListener("pointerdown", handlePrimaryInput);
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" && gameScreen.classList.contains("active")) {
       handlePrimaryInput(e);
     }
   });
+
+  // Add a gameScreen-level input handler so taps on overlays ("Get ready" overlay etc.)
+  // are received — many mobile devices place the overlay above the canvas which prevented
+  // the canvas listener from firing. Use PointerEvent when available; otherwise fall back
+  // to touchstart for older browsers.
+  if (window.PointerEvent) {
+    gameScreen.addEventListener("pointerdown", (e) => {
+      // only handle primary pointers (touch/left-click)
+      if (e.isPrimary === false) return;
+      handlePrimaryInput(e);
+    });
+  } else {
+    // touchstart fallback (ensure we can call preventDefault)
+    gameScreen.addEventListener("touchstart", (e) => handlePrimaryInput(e), { passive: false });
+  }
 
   pauseBtn.addEventListener("click", () => {
     if (state !== "playing") return;
