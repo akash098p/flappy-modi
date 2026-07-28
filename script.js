@@ -16,9 +16,9 @@
   ];
 
   const VEHICLES = [
-    { id: "flappy1", name: "Wings", cost: 0,   img: "images/flappy1.png" },
-    { id: "flappy2", name: "Helecopter",  cost: 80,  img: "images/flappy2.png" },
-    { id: "flappy3", name: "Tejas",    cost: 150, img: "images/flappy3.png" },
+    { id: "flappy1", name: "Rickshaw", cost: 0,   img: "images/flappy1.png" },
+    { id: "flappy2", name: "Scooter",  cost: 80,  img: "images/flappy2.png" },
+    { id: "flappy3", name: "Cycle",    cost: 150, img: "images/flappy3.png" },
   ];
 
   const GRAVITY = 1500;         // px/s^2
@@ -300,45 +300,59 @@
   function rand(min, max) { return min + Math.random() * (max - min); }
 
   /* ---------------- Input ---------------- */
-  function handlePrimaryInput(e) {
-    if (e) e.preventDefault();
+  // Flap/start input is bound at the document level (not just the canvas)
+  // so it works no matter what element sits on top on a given device/browser.
+  // Buttons and overlay controls are excluded via isInteractiveTarget,
+  // so this never steals taps meant for real UI buttons.
+
+  function isInteractiveTarget(target) {
+    if (!target || !target.closest) return false;
+    return !!target.closest(
+      "button, .btn-primary, .btn-secondary, .pick-card, #pause-btn"
+    );
+  }
+
+  function startGameIfNeeded() {
     if (state === "ready") {
       state = "playing";
       getReadyOverlay.classList.add("hidden");
       playBgm();
-      flap();
-    } else if (state === "playing") {
-      flap();
     }
   }
 
   function flap() {
+    if (state !== "playing" && state !== "ready") return;
     bird.vy = FLAP_VELOCITY;
     playSound(audioJump);
   }
 
-  // Keep the canvas listener for compatibility with desktop pointer/mouse input
-  canvas.addEventListener("pointerdown", handlePrimaryInput);
+  function onInputStart(e) {
+    // Only handle input while the game screen is actually showing.
+    if (!gameScreen.classList.contains("active")) return;
+    // Don't hijack taps on real UI controls (pause button, overlay buttons, etc).
+    if (isInteractiveTarget(e.target)) return;
+    // Ignore input while paused or after game over — those have their own buttons.
+    if (state === "paused" || state === "gameover") return;
+
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+    startGameIfNeeded();
+    flap();
+  }
+
+  // Keyboard (desktop)
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && gameScreen.classList.contains("active")) {
-      handlePrimaryInput(e);
+    if (e.code === "Space" || e.key === " ") {
+      onInputStart(e);
     }
   });
 
-  // Add a gameScreen-level input handler so taps on overlays ("Get ready" overlay etc.)
-  // are received — many mobile devices place the overlay above the canvas which prevented
-  // the canvas listener from firing. Use PointerEvent when available; otherwise fall back
-  // to touchstart for older browsers.
-  if (window.PointerEvent) {
-    gameScreen.addEventListener("pointerdown", (e) => {
-      // only handle primary pointers (touch/left-click)
-      if (e.isPrimary === false) return;
-      handlePrimaryInput(e);
-    });
-  } else {
-    // touchstart fallback (ensure we can call preventDefault)
-    gameScreen.addEventListener("touchstart", (e) => handlePrimaryInput(e), { passive: false });
-  }
+  // Pointer events (covers mouse, touch, and stylus on modern browsers)
+  document.addEventListener("pointerdown", onInputStart, { passive: false });
+
+  // Fallbacks for older/inconsistent mobile browsers that don't fire pointer events reliably
+  document.addEventListener("touchstart", onInputStart, { passive: false });
+  document.addEventListener("mousedown", onInputStart);
 
   pauseBtn.addEventListener("click", () => {
     if (state !== "playing") return;
@@ -788,7 +802,13 @@
     return true; // loop keeps running lightly; update() no-ops physics when not "playing"
   }
 
-  /* Prevent page scroll/bounce on mobile */
-  document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+  /* Prevent page scroll/bounce on mobile, but only while the game screen
+     is active — otherwise this blocks scrolling the theme/vehicle pickers
+     on the home screen. */
+  document.addEventListener("touchmove", (e) => {
+    if (gameScreen.classList.contains("active")) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 
 })();
