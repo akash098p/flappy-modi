@@ -272,7 +272,7 @@
       y: H * 0.42,
       vy: 0,
       rotation: 0,
-      size: Math.max(38, Math.min(60, W * 0.11)),
+      size: Math.max(50, Math.min(80, W * 0.14)),
     };
     pipes = [];
     cockroaches = [];
