@@ -320,6 +320,10 @@ html,body{
 }
 .overlay.hidden{ display:none; }
 
+/* The "get ready" overlay has no buttons — let taps pass through to the
+   document-level input handler instead of being swallowed by this layer. */
+#get-ready-overlay{ pointer-events:none; }
+
 .overlay-card{
   background:var(--cream);
   border:4px solid var(--ink);
