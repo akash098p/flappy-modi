@@ -9,10 +9,10 @@
 
   const THEMES = [
     { id: "day",      name: "Day",      cost: 0,   swatch: "linear-gradient(180deg,#7ed6ff,#ffe9a8)" },
-    { id: "night",    name: "Night",    cost: 40,  swatch: "linear-gradient(180deg,#0d1b3e,#3a3f7a)" },
-    { id: "desert",   name: "Desert",   cost: 60,  swatch: "linear-gradient(180deg,#ffd58a,#ff9a56)" },
-    { id: "ocean",    name: "Ocean",    cost: 60,  swatch: "linear-gradient(180deg,#bdf0ff,#4fb8d6)" },
-    { id: "festival", name: "Festival", cost: 100, swatch: "linear-gradient(180deg,#ff8fb1,#ffd36e)" },
+    { id: "night",    name: "Night",    cost: 15,  swatch: "linear-gradient(180deg,#0d1b3e,#3a3f7a)" },
+    { id: "desert",   name: "Desert",   cost: 25,  swatch: "linear-gradient(180deg,#ffd58a,#ff9a56)" },
+    { id: "ocean",    name: "Ocean",    cost: 45,  swatch: "linear-gradient(180deg,#bdf0ff,#4fb8d6)" },
+    { id: "festival", name: "Festival", cost: 55, swatch: "linear-gradient(180deg,#ff8fb1,#ffd36e)" },
   ];
 
   const VEHICLES = [
