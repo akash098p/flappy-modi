@@ -146,8 +146,8 @@
   const audioTap = document.getElementById("audio-tap");
   const audioPurchase = document.getElementById("audio-purchase");
   const audioPreview = document.getElementById("audio-preview");
-  const audioOoh = document.getElementById("audio-ooh");
   const audioKya = document.getElementById("audio-kya");
+  const audioOoh = document.getElementById("audio-ooh");
   const audioAnimation = document.getElementById("audio-animation");
   const audioRewards = document.getElementById("audio-rewards");
   audioBgm.volume = 0.45;
