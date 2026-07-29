@@ -38,12 +38,12 @@
   const PIPE_SPEED = 165;       // px/s (scales slightly with score)
   const GROUND_HEIGHT_RATIO = 0.12;
   const BIRD_SIZE = 44;
-  const COCKROACH_INTERVAL_MIN = 3.2;
-  const COCKROACH_INTERVAL_MAX = 5.5;
+  const COCKROACH_INTERVAL_MIN = 5.0;
+  const COCKROACH_INTERVAL_MAX = 8.0;
   const MELON_INTERVAL_MIN = 4.5;
   const MELON_INTERVAL_MAX = 8;
   // Rare collectible melody (diamond) — spawns less often than decorative melons
-  const MELODY_INTERVAL_MIN = 12;
+  const MELODY_INTERVAL_MIN = 10;
   const MELODY_INTERVAL_MAX = 22;
   const MELODY_SIZE = 40;
   const MELODY_SPEED = 150;
@@ -147,6 +147,7 @@
   const audioPurchase = document.getElementById("audio-purchase");
   const audioPreview = document.getElementById("audio-preview");
   const audioOoh = document.getElementById("audio-ooh");
+  const audioKya = document.getElementById("audio-kya");
   const audioAnimation = document.getElementById("audio-animation");
   const audioRewards = document.getElementById("audio-rewards");
   audioBgm.volume = 0.45;
@@ -159,6 +160,7 @@
   audioPurchase.volume = 0.8;
   audioPreview.volume = 0.5;
   audioOoh.volume = 0.85;
+  audioKya.volume = 0.9;
   audioAnimation.volume = 0.7;
   audioRewards.volume = 0.8;
 
@@ -533,6 +535,7 @@
   let rafId = null;
   let currentVehicleImg = null;
   let respawnCount = 0;
+  let cockroachSoundToggle = false; // Alternate between two sounds
 
   function updateHud() {
     hudHitsEl.textContent = save.hits;
@@ -1022,8 +1025,7 @@
       const cy = c.y + Math.sin(c.bob) * 8;
       if (circleCircleCollision(bird, { x: c.x, y: cy, r: c.size * 0.34 })) {
         // Cockroach collision!
-        playSound(audioOoh);
-
+        
         if (save.hits > 0) {
           // Use a Hit — consume one, remove the cockroach, continue playing
           save.hits--;
@@ -1031,9 +1033,17 @@
           updateHud();
           cockroaches.splice(i, 1);
           bird.vy = -200;
+          
+          // Alternate between two sounds when hit is used
+          if (cockroachSoundToggle) {
+            playSound(audioKya);
+          } else {
+            playSound(audioOoh);
+          }
+          cockroachSoundToggle = !cockroachSoundToggle;
           continue;
         } else {
-          // No hits — end game (will show respawn overlay with melody cost)
+          // No hits — end game with game over sound only
           return endGame();
         }
       }
