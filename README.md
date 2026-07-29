@@ -100,7 +100,7 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/flappy-modi.git
+git clone https://github.com/akash098p/flappy-modi.git
 ```
 
 2. Navigate to the project folder:
