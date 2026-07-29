@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<link rel="icon" type="image/png" href="images/logo.png" />
+<title>Flappy Modi</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app" data-theme="day">
+
+  <!-- ===================== HOME SCREEN ===================== -->
+  <section id="home-screen" class="screen active">
+    <div class="home-inner">
+      <!-- TOP: Title & Logo -->
+      <div class="home-top">
+        <h1 class="game-title">FLAPPY <span>MODI</span></h1>
+        <img class="game-logo" src="images/logo.png" alt="Flappy Modi logo" />
+      </div>
+
+      <!-- MIDDLE: Stats & Play Button -->
+      <div class="home-middle">
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-label">Best Score</span>
+            <span class="stat-value" id="home-best-score">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Coins</span>
+            <span class="stat-value coin-value"><span class="coin-dot"></span><span id="home-coins">0</span></span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Melodies</span>
+            <span class="stat-value melody-value"><img class="melody-icon" src="images/melody .png" alt="melody" /><span id="home-melodies">0</span></span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Hits</span>
+            <span class="stat-value hit-value"><img class="hit-icon" src="images/hit.png" alt="hit" /><span id="home-hits">0</span></span>
+          </div>
+        </div>
+
+        <button id="play-btn" class="btn-primary">
+          <span class="btn-icon">▶</span> PLAY
+        </button>
+      </div>
+
+      <!-- BOTTOM: Menu Buttons -->
+      <div class="home-bottom">
+        <div class="menu-buttons">
+          <button id="menu-themes-btn" class="menu-btn">🎨 Themes</button>
+          <button id="menu-vehicles-btn" class="menu-btn">✈️ Vehicles</button>
+          <button id="menu-songs-btn" class="menu-btn">🎵 Songs</button>
+          <button id="menu-store-btn" class="menu-btn">🛒 Store</button>
+        </div>
+        <p class="footer-note">More features coming soon...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== THEME SCREEN ===================== -->
+  <section id="theme-screen" class="screen">
+    <div class="sub-inner">
+      <div class="sub-header">
+        <button class="back-btn" data-back="home">‹ Back</button>
+        <h2 class="sub-title">Themes</h2>
+      </div>
+      <p class="sub-hint">Tap to select · locked themes cost coins</p>
+      <div id="theme-list" class="picker-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== VEHICLE SCREEN ===================== -->
+  <section id="vehicle-screen" class="screen">
+    <div class="sub-inner">
+      <div class="sub-header">
+        <button class="back-btn" data-back="home">‹ Back</button>
+        <h2 class="sub-title">Vehicles</h2>
+      </div>
+      <p class="sub-hint">Tap to select · locked vehicles cost coins</p>
+      <div id="vehicle-list" class="picker-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== SONG SCREEN ===================== -->
+  <section id="song-screen" class="screen">
+    <div class="sub-inner">
+      <div class="sub-header">
+        <button class="back-btn" data-back="home">‹ Back</button>
+        <h2 class="sub-title">Songs</h2>
+      </div>
+      <p class="sub-hint">Tap ▶ to preview · Tap to select as game background</p>
+      <div id="song-list" class="song-list"></div>
+    </div>
+  </section>
+
+  <!-- ===================== STORE SCREEN ===================== -->
+  <section id="store-screen" class="screen">
+    <div class="sub-inner">
+      <div class="sub-header">
+        <button class="back-btn" data-back="home">‹ Back</button>
+        <h2 class="sub-title">Store</h2>
+      </div>
+      <p class="sub-hint">Buy items with coins · Hits protect from cockroach collisions</p>
+      <div id="store-list" class="store-list"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ROULETTE OVERLAY ===================== -->
+  <div id="roulette-overlay" class="overlay hidden">
+    <div class="overlay-card roulette-card">
+      <h2>Melody Pack!</h2>
+      <p class="roulette-hint">Tap to spin and win melodies!</p>
+      <div class="roulette-container">
+        <div class="roulette-track" id="roulette-track"></div>
+        <div class="roulette-pointer">▶</div>
+      </div>
+      <button id="spin-btn" class="btn-primary">SPIN!</button>
+      <button id="close-roulette-btn" class="btn-secondary" style="margin-top:8px;">Close</button>
+    </div>
+  </div>
+
+  <!-- ===================== GAME SCREEN ===================== -->
+  <section id="game-screen" class="screen">
+    <canvas id="game-canvas"></canvas>
+
+    <div id="hud">
+      <div id="hud-score">0</div>
+      <div id="hud-items">
+        <span class="hud-item hit-value"><img class="hit-icon-sm" src="images/hit.png" alt="hit" /><span id="hud-hits">0</span></span>
+        <span class="hud-item melody-value"><img class="melody-icon-sm" src="images/melody .png" alt="melody" /><span id="hud-melodies">0</span></span>
+      </div>
+      <button id="pause-btn" aria-label="Pause">II</button>
+    </div>
+
+    <div id="get-ready-overlay" class="overlay">
+      <div class="overlay-card">
+        <h2>Get Ready</h2>
+        <p>Tap anywhere to flap</p>
+      </div>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2>Paused</h2>
+        <button id="resume-btn" class="btn-primary small">Resume</button>
+        <button id="pause-home-btn" class="btn-secondary small">Home</button>
+      </div>
+    </div>
+
+    <div id="respawn-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2>Collided!</h2>
+        <p id="respawn-cost-text">Respawn for 1 melody?</p>
+        <div class="go-btn-row">
+          <button id="respawn-btn" class="btn-primary small">Respawn</button>
+          <button id="no-respawn-btn" class="btn-secondary small">Give Up</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameover-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2>Game Over</h2>
+        <div class="go-stats">
+          <div class="go-stat">
+            <span class="go-label">Score</span>
+            <span class="go-value" id="go-score">0</span>
+          </div>
+          <div class="go-stat">
+            <span class="go-label">Best</span>
+            <span class="go-value" id="go-best">0</span>
+          </div>
+          <div class="go-stat">
+            <span class="go-label">Coins earned</span>
+            <span class="go-value coin-value"><span class="coin-dot"></span><span id="go-coins">0</span></span>
+          </div>
+          <div class="go-stat">
+            <span class="go-label">Melodies</span>
+            <span class="go-value melody-value"><img class="melody-icon" src="images/melody .png" alt="melody" /><span id="go-melodies">0</span></span>
+          </div>
+        </div>
+        <div class="go-btn-row">
+          <button id="retry-btn" class="btn-primary small">Retry</button>
+          <button id="go-home-btn" class="btn-secondary small">Home</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================== AUDIO ===================== -->
+<audio id="audio-jump" src="audio/jump.mp3" preload="auto"></audio>
+<audio id="audio-bgm" preload="auto" loop></audio>
+<audio id="audio-gameover" src="audio/gameover.mp3" preload="auto"></audio>
+<audio id="audio-start" src="audio/start.mp3" preload="auto"></audio>
+<audio id="audio-melody" src="audio/melody.mp3" preload="auto"></audio>
+<audio id="audio-homebg" src="audio/main home bg.mp3" preload="auto" loop></audio>
+<audio id="audio-tap" src="audio/tap.mp3" preload="auto"></audio>
+<audio id="audio-purchase" src="audio/purchase.mp3" preload="auto"></audio>
+<audio id="audio-preview" preload="auto"></audio>
+<audio id="audio-ooh" src="audio/ooh mai god.mp3" preload="auto"></audio>
+<audio id="audio-animation" src="audio/animation.mp3" preload="auto" loop></audio>
+<audio id="audio-rewards" src="audio/rewards.mp3" preload="auto"></audio>
+
+<script src="script.js"></script>
+</body>
+</html>
