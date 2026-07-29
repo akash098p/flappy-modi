@@ -1,10 +1,14 @@
 # Flappy Modi
 
+<p align="center">
+  
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Canvas](https://img.shields.io/badge/Canvas-FF6B6B?style=for-the-badge&logo=html5&logoColor=white)
 ![Mobile](https://img.shields.io/badge/Mobile-Responsive-green?style=for-the-badge&logo=mobile&logoColor=white)
+
+</p>
 
 A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and music. Built with vanilla JavaScript and HTML5 Canvas for smooth mobile gameplay.
 
@@ -18,6 +22,21 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - **Melody Pack Roulette**: Spin to win melodies and coins
 - **Responsive Design**: Optimized for mobile devices with touch controls
 - **Persistent Progress**: Local storage saves your coins, melodies, and unlocks
+
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c52897f4-067d-428e-aaaa-1f50d85ba1f5" width="48%">
+  <img src="https://github.com/user-attachments/assets/f218a91f-0af8-46e8-a565-13650598e426" width="48%">
+<br>
+  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="48%">
+  <img src="https://github.com/user-attachments/assets/87a90c70-9687-46db-8aaf-d3f2d135449f" width="48%">
+<br>
+  <img src="https://github.com/user-attachments/assets/50bdbe61-87db-4327-8a83-a153ad92143b" width="48%">
+  <img src="https://github.com/user-attachments/assets/ed875a3c-c7bf-4f76-b3d5-78eb61beeae8" width="48%">
+
+</p>
 
 ## 🎯 Gameplay
 
