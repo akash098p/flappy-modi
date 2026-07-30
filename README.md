@@ -7,7 +7,6 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Canvas](https://img.shields.io/badge/Canvas-FF6B6B?style=for-the-badge&logo=html5&logoColor=white)
 ![Mobile](https://img.shields.io/badge/Mobile-Responsive-green?style=for-the-badge&logo=mobile&logoColor=white)
-
 </p>
 
 A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and music. Built with vanilla JavaScript and HTML5 Canvas for smooth mobile gameplay.
