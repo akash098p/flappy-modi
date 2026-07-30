@@ -1,3 +1,4 @@
+
 # Flappy Modi
 
 <p align="center">
@@ -29,8 +30,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
   <img src="https://github.com/user-attachments/assets/c52897f4-067d-428e-aaaa-1f50d85ba1f5" width="45%">
   <img src="https://github.com/user-attachments/assets/f218a91f-0af8-46e8-a565-13650598e426" width="51%">
 <br>
-  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="46%">
-  <img src="https://github.com/user-attachments/assets/87a90c70-9687-46db-8aaf-d3f2d135449f" width="50%">
+  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="48%">
+  <img src="https://github.com/user-attachments/assets/88b4d2b7-a7b1-4fac-a675-d097d00fab15" width="48%">
 <br>
   <img src="https://github.com/user-attachments/assets/50bdbe61-87db-4327-8a83-a153ad92143b" width="39%">
   <img src="https://github.com/user-attachments/assets/ed875a3c-c7bf-4f76-b3d5-78eb61beeae8" width="57%">
