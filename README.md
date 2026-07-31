@@ -1,5 +1,3 @@
-<img width="1030" height="602" alt="Screenshot 2026-07-30 212400" src=" />
-
 # Flappy Modi
 
 <p align="center">
