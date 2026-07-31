@@ -57,6 +57,7 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Desert | 25 Coins | Warm orange sunset vibes |
 | Ocean | 45 Coins | Cool blue underwater theme |
 | Festival | 55 Coins | Vibrant pink and yellow celebration |
+| | ||
 
 ## ✈️ Vehicles
 
@@ -65,6 +66,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Wing | Free | Classic flappy bird style |
 | Helicopter | 20 Coins | Rotor-based flying machine |
 | Tejas | 50 Coins | Advanced jet aircraft |
+|  |  |  |
+| | |  |  |  
 
 ## 🎵 Soundtracks
 
