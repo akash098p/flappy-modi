@@ -196,7 +196,16 @@
 
     <div id="respawn-overlay" class="overlay hidden">
       <div class="overlay-card">
-        <h2>Collided!</h2>
+        <div class="respawn-header">
+          <h2>Collided!</h2>
+          <div id="respawn-timer" class="respawn-timer hidden" aria-label="Auto give up timer">
+            <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="respawn-timer-text">3</span>
+          </div>
+        </div>
         <p id="respawn-cost-text">Respawn for 1 melody?</p>
         <div class="go-btn-row">
           <button id="respawn-btn" class="btn-primary small">Respawn</button>
