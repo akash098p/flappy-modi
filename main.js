@@ -33,6 +33,54 @@ window.goScoreEl = null; window.goBestEl = null; window.goCoinsEl = null; window
 window.respawnCostText = null;
 window.allScreens = null;
 
+// Tips & Settings UI (global)
+window.tipsBtn = null; window.settingsBtn = null;
+window.tipsOverlay = null; window.tipsCloseBtn = null;
+window.settingsOverlay = null; window.settingsCloseBtn = null;
+window.sfxVolumeInput = null; window.bgmVolumeInput = null;
+
+// Volume settings persistence
+window.SETTINGS_KEY = "flappyModiSettings_v1";
+window.audioSettings = (function() {
+  try {
+    const raw = localStorage.getItem(window.SETTINGS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        sfx: typeof parsed.sfx === "number" ? parsed.sfx : 0.8,
+        bgm: typeof parsed.bgm === "number" ? parsed.bgm : 0.88,
+      };
+    }
+  } catch (e) { /* ignore */ }
+  return { sfx: 0.8, bgm: 0.88 };
+})();
+
+window.saveAudioSettings = function() {
+  try { localStorage.setItem(window.SETTINGS_KEY, JSON.stringify(window.audioSettings)); }
+  catch (e) { /* ignore */ }
+}
+
+// Base volumes for each audio element (multiplied by user's setting)
+window.SFX_AUDIO_IDS = [
+  ["audioJump", 0.7], ["audioGameover", 0.8], ["audioStart", 0.8],
+  ["audioMelody", 0.9], ["audioTap", 0.7], ["audioPurchase", 0.8],
+  ["audioOoh", 0.85], ["audioKya", 0.9], ["audioRewards", 0.8],
+];
+window.BGM_AUDIO_IDS = [
+  ["audioBgm", 0.88], ["audioHomeBg", 0.9], ["audioPreview", 0.5], ["audioAnimation", 0.7],
+];
+
+window.applyAudioVolumes = function() {
+  window.SFX_AUDIO_IDS.forEach(([key, base]) => {
+    const el = window[key];
+    if (el) el.volume = base * window.audioSettings.sfx;
+  });
+  window.BGM_AUDIO_IDS.forEach(([key, base]) => {
+    const el = window[key];
+    if (el) el.volume = base * window.audioSettings.bgm;
+  });
+}
+
 // Image cache (global)
 window.imageCache = {};
 
@@ -430,6 +478,21 @@ window.init = function() {
   window.goMelodiesEl = document.getElementById("go-melodies");
   window.respawnCostText = document.getElementById("respawn-cost-text");
 
+  // Tips & Settings UI (global)
+  window.tipsBtn = document.getElementById("tips-btn");
+  window.settingsBtn = document.getElementById("settings-btn");
+  window.tipsOverlay = document.getElementById("tips-overlay");
+  window.tipsCloseBtn = document.getElementById("tips-close-btn");
+  window.settingsOverlay = document.getElementById("settings-overlay");
+  window.settingsCloseBtn = document.getElementById("settings-close-btn");
+  window.sfxVolumeInput = document.getElementById("sfx-volume");
+  window.bgmVolumeInput = document.getElementById("bgm-volume");
+
+  // Apply saved audio volume settings
+  window.sfxVolumeInput.value = window.audioSettings.sfx;
+  window.bgmVolumeInput.value = window.audioSettings.bgm;
+  window.applyAudioVolumes();
+
   window.resizeCanvas();
   window.addEventListener("resize", window.resizeCanvas);
 
@@ -479,6 +542,48 @@ window.init = function() {
 
   window.playBtn.addEventListener("click", () => {
     window.playTap(); window.playSound(window.audioStart); window.stopHomeBg(); window.stopPreview(); window.startNewGame();
+  });
+
+  // Tips overlay
+  window.tipsBtn.addEventListener("click", () => {
+    window.playTap(); window.stopPreview();
+    window.tipsOverlay.classList.remove("hidden");
+  });
+  window.tipsCloseBtn.addEventListener("click", () => {
+    window.playTap();
+    window.tipsOverlay.classList.add("hidden");
+  });
+  window.tipsOverlay.addEventListener("click", (e) => {
+    if (e.target === window.tipsOverlay) window.tipsOverlay.classList.add("hidden");
+  });
+
+  // Settings overlay
+  window.settingsBtn.addEventListener("click", () => {
+    window.playTap(); window.stopPreview();
+    window.settingsOverlay.classList.remove("hidden");
+  });
+  window.settingsCloseBtn.addEventListener("click", () => {
+    window.playTap();
+    window.settingsOverlay.classList.add("hidden");
+  });
+  window.settingsOverlay.addEventListener("click", (e) => {
+    if (e.target === window.settingsOverlay) window.settingsOverlay.classList.add("hidden");
+  });
+
+  // Volume sliders
+  window.sfxVolumeInput.addEventListener("input", () => {
+    window.audioSettings.sfx = parseFloat(window.sfxVolumeInput.value);
+    window.saveAudioSettings();
+    window.applyAudioVolumes();
+    if (!window.sfxVolumeInput.dataset.touched) {
+      window.sfxVolumeInput.dataset.touched = "1";
+      window.playTap();
+    }
+  });
+  window.bgmVolumeInput.addEventListener("input", () => {
+    window.audioSettings.bgm = parseFloat(window.bgmVolumeInput.value);
+    window.saveAudioSettings();
+    window.applyAudioVolumes();
   });
 
   window.spinBtn.addEventListener("click", window.spinRoulette);
