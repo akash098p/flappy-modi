@@ -20,9 +20,10 @@ window.renderPickers = function() {
     const selected = save.selectedTheme === t.id;
     const card = document.createElement("div");
     card.className = "pick-card" + (owned ? " owned" : "") + (selected ? " selected" : "");
+    const previewClass = window.getThemePreviewClass(t.id);
     card.innerHTML = `
       <div class="lock-badge">🔒</div>
-      <div class="pick-thumb theme-swatch" style="background:${t.swatch}">
+      <div class="pick-thumb theme-swatch ${previewClass}" style="background:${t.swatch}">
         <div class="decorations"></div>
       </div>
       <div class="pick-name">${t.name}</div>
