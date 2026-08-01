@@ -6,6 +6,19 @@
 window.themeDecorations = [];
 window.decorTime = 0;
 
+// Theme preview class mapping for CSS-drawn previews
+window.getThemePreviewClass = function(themeId) {
+  const map = {
+    day: "preview-day",
+    night: "preview-night",
+    desert: "preview-desert",
+    ocean: "preview-ocean",
+    diwali: "preview-diwali",
+    independence: "preview-independence"
+  };
+  return map[themeId] || "";
+}
+
 window.buildThemeDecorations = function() {
   const theme = app.getAttribute("data-theme");
   window.themeDecorations = [];
