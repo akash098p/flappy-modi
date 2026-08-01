@@ -13,6 +13,10 @@
 
   <!-- ===================== HOME SCREEN ===================== -->
   <section id="home-screen" class="screen active">
+    <!-- Corner buttons -->
+    <button id="tips-btn" class="corner-btn corner-btn-left" aria-label="How to play">💡 Tips</button>
+    <button id="settings-btn" class="corner-btn corner-btn-right" aria-label="Settings">⚙️ Settings</button>
+
     <div class="home-inner">
       <!-- TOP: Title & Logo -->
       <div class="home-top">
@@ -54,7 +58,15 @@
           <button id="menu-songs-btn" class="menu-btn">🎵 Songs</button>
           <button id="menu-store-btn" class="menu-btn">🛒 Store</button>
         </div>
-        <p class="footer-note">More features coming soon...</p>
+        <div class="home-footer">
+          <p class="footer-note">More features coming soon...</p>
+          <a class="github-link" href="https://github.com/akash098p" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile akash098p">
+            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            akash098p
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -106,6 +118,39 @@
       <div id="store-list" class="store-list"></div>
     </div>
   </section>
+
+  <!-- ===================== TIPS OVERLAY ===================== -->
+  <div id="tips-overlay" class="overlay hidden">
+    <div class="overlay-card info-card">
+      <h2>💡 How to Play</h2>
+      <div class="info-list">
+        <div class="info-item"><span class="info-num">1</span><p><strong>Tap to Flap</strong> — Tap anywhere to make Modi fly. Don't stop tapping!</p></div>
+        <div class="info-item"><span class="info-num">2</span><p><strong>Avoid Obstacles</strong> — Dodge pipes, watch out for cockroaches 🪳.</p></div>
+        <div class="info-item"><span class="info-num">3</span><p><strong>Score Points</strong> — Pass through pipe gaps to earn score & coins. That's how you win!</p></div>
+        <div class="info-item"><span class="info-num">4</span><p><strong>Use Hits</strong> — Hits protect you once from a cockroach collision. Buy more in the Store.</p></div>
+        <div class="info-item"><span class="info-num">5</span><p><strong>Collect Melodies</strong> — Catch melodies mid-flight. They let you <em>respawn</em> after a crash.</p></div>
+        <div class="info-item"><span class="info-num">6</span><p><strong>Buy Melody Pack</strong> — Get melodies from the Store & spin the roulette for extra melodies.</p></div>
+        <div class="info-item"><span class="info-num">7</span><p><strong>Customize</strong> — Unlock new <em>Themes</em> 🎨 and <em>Vehicles</em> ✈️ with your coins!</p></div>
+      </div>
+      <button id="tips-close-btn" class="btn-primary small">Got it!</button>
+    </div>
+  </div>
+
+  <!-- ===================== SETTINGS OVERLAY ===================== -->
+  <div id="settings-overlay" class="overlay hidden">
+    <div class="overlay-card settings-card">
+      <h2>⚙️ Settings</h2>
+      <div class="settings-row">
+        <div class="settings-label">🔊 Sound Effects</div>
+        <input type="range" id="sfx-volume" min="0" max="1" step="0.05" value="0.8" />
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">🎵 Music</div>
+        <input type="range" id="bgm-volume" min="0" max="1" step="0.05" value="0.88" />
+      </div>
+      <button id="settings-close-btn" class="btn-primary small">Close</button>
+    </div>
+  </div>
 
   <!-- ===================== ROULETTE OVERLAY ===================== -->
   <div id="roulette-overlay" class="overlay hidden">
