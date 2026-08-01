@@ -18,6 +18,8 @@ window.rafId = null;
 window.currentVehicleImg = null;
 window.respawnCount = 0;
 window.cockroachSoundToggle = false;
+window.respawnTimerId = null;
+window.respawnTimeLeft = 3;
 
 // DOM element references (global)
 window.app = null; window.homeScreen = null; window.gameScreen = null; window.themeScreen = null; window.vehicleScreen = null; window.songScreen = null; window.storeScreen = null;
@@ -358,6 +360,31 @@ window.showRespawnOverlay = function() {
   }
   window.respawnOverlay.classList.remove("hidden");
   window.state = "respawning";
+  window.startRespawnTimer();
+}
+
+window.startRespawnTimer = function() {
+  window.clearRespawnTimer();
+  window.respawnTimeLeft = 3;
+  window.respawnTimerTextEl.textContent = "3";
+  window.respawnTimerEl.classList.remove("hidden");
+  window.respawnTimerEl.style.animation = "none";
+  void window.respawnTimerEl.offsetWidth;
+  window.respawnTimerEl.style.animation = "";
+  window.respawnTimerId = setInterval(() => {
+    window.respawnTimeLeft--;
+    window.respawnTimerTextEl.textContent = String(window.respawnTimeLeft);
+    if (window.respawnTimeLeft <= 0) {
+      window.clearRespawnTimer();
+      window.respawnOverlay.classList.add("hidden");
+      window.state = "gameover";
+      window.gameoverOverlay.classList.remove("hidden");
+    }
+  }, 1000);
+}
+
+window.clearRespawnTimer = function() {
+  if (window.respawnTimerId) { clearInterval(window.respawnTimerId); window.respawnTimerId = null; }
 }
 
 window.goHome = function() {
@@ -477,6 +504,8 @@ window.init = function() {
   window.goCoinsEl = document.getElementById("go-coins");
   window.goMelodiesEl = document.getElementById("go-melodies");
   window.respawnCostText = document.getElementById("respawn-cost-text");
+  window.respawnTimerEl = document.getElementById("respawn-timer");
+  window.respawnTimerTextEl = document.getElementById("respawn-timer-text");
 
   // Tips & Settings UI (global)
   window.tipsBtn = document.getElementById("tips-btn");
@@ -520,9 +549,9 @@ window.init = function() {
   window.goHomeBtn.addEventListener("click", () => { window.playTap(); window.goHome(); });
   window.retryBtn.addEventListener("click", () => { window.playTap(); window.playSound(window.audioStart); window.startNewGame(); });
 
-  window.respawnBtn.addEventListener("click", () => { window.playTap(); window.doRespawn(); });
+  window.respawnBtn.addEventListener("click", () => { window.playTap(); window.clearRespawnTimer(); window.doRespawn(); });
   window.noRespawnBtn.addEventListener("click", () => {
-    window.playTap();
+    window.playTap(); window.clearRespawnTimer();
     window.respawnOverlay.classList.add("hidden");
     window.state = "gameover";
     window.gameoverOverlay.classList.remove("hidden");
