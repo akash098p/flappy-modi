@@ -26,14 +26,15 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/c52897f4-067d-428e-aaaa-1f50d85ba1f5" width="45%">
-  <img src="https://github.com/user-attachments/assets/f218a91f-0af8-46e8-a565-13650598e426" width="51%">
+  <img src="https://github.com/user-attachments/assets/65967fd7-6f50-4635-91f8-e84da71ec0f2" width="37.4%">
+  <img src="https://github.com/user-attachments/assets/6a6e85dc-763d-4f28-89e7-266fd7cfef56" width="58.6%">
 <br>
-  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="48.5%">
-  <img src="https://github.com/user-attachments/assets/88b4d2b7-a7b1-4fac-a675-d097d00fab15" width="47.5%">
+  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="50.7%">
+  <img src="https://github.com/user-attachments/assets/da410a14-c0fc-4c2b-8904-a81ee2b07993" width="45.3%">
+
 <br>
   <img src="https://github.com/user-attachments/assets/50bdbe61-87db-4327-8a83-a153ad92143b" width="38.5%">
-  <img src="https://github.com/user-attachments/assets/40039f3d-3b09-4af3-a7ff-1f59d44a4e24" width="57.5%">
+  <img src="https://github.com/user-attachments/assets/aee60940-084a-47b4-8c2f-ea65708d5774" width="57.5%">
 
 </p>
 
