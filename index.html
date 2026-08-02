@@ -11,8 +11,21 @@
 
 <div id="app" data-theme="day">
 
+  <!-- ===================== LOADING SCREEN ===================== -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <img class="loading-logo" src="images/logo.png" alt="Flappy Modi" />
+      <h1 class="loading-title">FLAPPY MODI</h1>
+      <div class="loading-spinner">
+        <div class="spinner-dot"></div>
+        <div class="spinner-dot"></div>
+        <div class="spinner-dot"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== HOME SCREEN ===================== -->
-  <section id="home-screen" class="screen active">
+  <section id="home-screen" class="screen">
     <!-- Corner buttons -->
     <button id="tips-btn" class="corner-btn corner-btn-left" aria-label="How to play">💡 Tips</button>
     <button id="settings-btn" class="corner-btn corner-btn-right" aria-label="Settings">⚙️ Settings</button>
@@ -158,11 +171,23 @@
       <h2>Melody Pack!</h2>
       <p class="roulette-hint">Tap to spin and win melodies!</p>
       <div class="roulette-container">
-        <div class="roulette-track" id="roulette-track"></div>
-        <div class="roulette-pointer">▶</div>
+        <div class="roulette-hand"></div>
+        <div class="roulette-track-wrapper">
+          <div class="roulette-track" id="roulette-track"></div>
+        </div>
       </div>
       <button id="spin-btn" class="btn-primary">SPIN!</button>
       <button id="close-roulette-btn" class="btn-secondary" style="margin-top:8px;">Close</button>
+    </div>
+  </div>
+
+  <!-- ===================== PRIZE NOTIFICATION ===================== -->
+  <div id="prize-notification" class="prize-notification hidden">
+    <div class="prize-content">
+      <div class="prize-icon">🎉</div>
+      <h2 class="prize-title">YOU WON!</h2>
+      <div class="prize-reward" id="prize-reward"></div>
+      <button id="prize-close-btn" class="btn-primary small">Awesome!</button>
     </div>
   </div>
 
