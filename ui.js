@@ -77,12 +77,12 @@ window.renderStore = function() {
     </button>
   `;
   const hitBuyBtn = hitCard.querySelector(".store-buy-btn");
-  hitBuyBtn.addEventListener("click", () => {
+  hitBuyBtn.addEventListener("click", async () => {
     if (save.coins >= HIT_COST) {
       save.coins -= HIT_COST;
       save.hits++;
       window.playPurchase();
-      saveSave(save);
+      await window.saveGameState();
       window.renderPickers();
     } else {
       window.flashInsufficientCoins();
@@ -105,10 +105,10 @@ window.renderStore = function() {
     </button>
   `;
   const packBuyBtn = packCard.querySelector(".store-buy-btn");
-  packBuyBtn.addEventListener("click", () => {
+  packBuyBtn.addEventListener("click", async () => {
     if (save.coins >= MELODY_PACK_COST) {
       save.coins -= MELODY_PACK_COST;
-      saveSave(save);
+      await window.saveGameState();
       window.playPurchase();
       window.renderPickers();
       window.showRoulette();
@@ -138,18 +138,18 @@ window.renderSongs = function() {
       window.playTap();
       window.togglePreview(s.id);
     });
-    card.addEventListener("click", () => {
+    card.addEventListener("click", async () => {
       window.playTap();
       window.stopPreview();
       save.selectedSong = s.id;
-      saveSave(save);
+      await window.saveGameState();
       window.renderSongs();
     });
     window.songListEl.appendChild(card);
   });
 }
 
-window.selectOrUnlock = function(kind, item) {
+window.selectOrUnlock = async function(kind, item) {
   const unlockedKey = kind === "theme" ? "unlockedThemes" : "unlockedVehicles";
   const selectedKey = kind === "theme" ? "selectedTheme" : "selectedVehicle";
   const owned = save[unlockedKey].includes(item.id);
@@ -170,7 +170,7 @@ window.selectOrUnlock = function(kind, item) {
       return;
     }
   }
-  saveSave(save);
+  await window.saveGameState();
   window.renderPickers();
 }
 
@@ -203,7 +203,7 @@ window.showRoulette = function() {
   window.spinBtn.textContent = "SPIN!";
   window.buildRouletteTrack();
   window.rouletteTrack.style.transition = "none";
-  window.rouletteTrack.style.transform = "translateX(0)";
+  window.rouletteTrack.style.transform = "translateY(0)";
   window.spinBtn.style.display = "flex";
   window.closeRouletteBtn.style.display = "none";
 }
@@ -215,15 +215,29 @@ window.hideRoulette = function() {
 
 window.buildRouletteTrack = function() {
   window.rouletteTrack.innerHTML = "";
-  ROULETTE_PRIZES.forEach(prize => {
-    const prizeEl = document.createElement("div");
-    prizeEl.className = "roulette-prize";
-    prizeEl.innerHTML = `
-      <div class="roulette-prize-icon"><img src="${prize.icon}" alt="${prize.label}" /></div>
-      <div class="roulette-prize-text">${prize.label}</div>
-    `;
-    window.rouletteTrack.appendChild(prizeEl);
-  });
+  
+  // Create a single horizontal row with prizes repeated for infinity scroll
+  const rowEl = document.createElement("div");
+  rowEl.className = "roulette-row";
+  
+  // Repeat prizes multiple times for smooth infinite scroll effect
+  const repetitions = 10;
+  for (let r = 0; r < repetitions; r++) {
+    ROULETTE_PRIZES.forEach(prize => {
+      const prizeEl = document.createElement("div");
+      prizeEl.className = "roulette-prize";
+      prizeEl.innerHTML = `
+        <div class="roulette-prize-icon"><img src="${prize.icon}" alt="${prize.label}" /></div>
+        <div class="roulette-prize-text">${prize.label}</div>
+      `;
+      rowEl.appendChild(prizeEl);
+    });
+  }
+  
+  window.rouletteTrack.appendChild(rowEl);
+  
+  // Reset position to start
+  window.rouletteTrack.style.transition = "none";
   window.rouletteTrack.style.transform = "translateX(0)";
 }
 
@@ -233,6 +247,7 @@ window.spinRoulette = function() {
   window.spinBtn.textContent = "Spinning...";
   window.spinBtn.style.display = "none";
 
+  // Determine winning prize
   const rand = Math.random();
   let cumulative = 0;
   let winningPrize = ROULETTE_PRIZES[0];
@@ -245,37 +260,74 @@ window.spinRoulette = function() {
   }
 
   const prizeIndex = ROULETTE_PRIZES.indexOf(winningPrize);
-  const prizeWidth = 120;
-  const trackWidth = ROULETTE_PRIZES.length * prizeWidth;
+  const prizeWidth = 120; // Width of each prize card
+  const numPrizes = ROULETTE_PRIZES.length;
   const containerWidth = window.rouletteTrack.parentElement.offsetWidth;
-  const maxScroll = trackWidth - containerWidth;
-  const prizeOffset = (prizeWidth - containerWidth) / 2;
-  const fullRotations = 3;
-  const targetX = -(prizeIndex * prizeWidth + prizeOffset + fullRotations * trackWidth);
-  const finalX = Math.max(targetX, -maxScroll - prizeWidth);
+  
+  // Calculate center position (where the hand pointer is)
+  const centerOffset = (containerWidth - prizeWidth) / 2;
+  
+  // Calculate target position for winning prize to be centered
+  const targetPosition = (prizeIndex * prizeWidth) + centerOffset;
+  
+  // Add multiple full rotations for dramatic effect (infinity scroll)
+  const fullRotations = 8;
+  const totalDistance = (fullRotations * numPrizes * prizeWidth) + targetPosition;
+  
+  // Add slight randomness for realism
+  const randomOffset = (Math.random() - 0.5) * (prizeWidth * 0.4);
+  const finalX = totalDistance + randomOffset;
 
+  // Play spinning sound
   window.playAnimationSound();
-  window.rouletteTrack.style.transition = "transform 3s cubic-bezier(0.15, 0.8, 0.3, 1)";
-  window.rouletteTrack.style.transform = `translateX(${finalX}px)`;
+  
+  // Use smooth easing for realistic spin - 5 seconds total
+  // Fast start, gradual slowdown
+  window.rouletteTrack.style.transition = "transform 5s cubic-bezier(0.15, 0.8, 0.25, 1)";
+  window.rouletteTrack.style.transform = `translateX(-${finalX}px)`;
 
+  // Stop sound and show prize after animation completes
   setTimeout(() => {
     window.stopAnimationSound();
     window.awardPrize(winningPrize);
     window.closeRouletteBtn.style.display = "flex";
     window.closeRouletteBtn.textContent = "Close & Return to Store";
-  }, 3000);
+  }, 5000);
 }
 
-window.awardPrize = function(prize) {
+window.awardPrize = async function(prize) {
   window.playRewardSound();
   if (prize.type === "melody") {
     save.melodies += prize.reward;
   } else if (prize.type === "coin") {
     save.coins += prize.reward;
   }
-  saveSave(save);
+  await window.saveGameState();
   window.renderPickers();
+  
+  // Show styled prize notification instead of alert
   setTimeout(() => {
-    alert(`🎉 You won ${prize.label}!`);
+    const notification = document.getElementById("prize-notification");
+    const rewardEl = document.getElementById("prize-reward");
+    
+    if (notification && rewardEl) {
+      // Set reward text with icon
+      if (prize.type === "melody") {
+        rewardEl.innerHTML = `<img src="images/melody .png" alt="melody" />${prize.reward} Melodies`;
+      } else if (prize.type === "coin") {
+        rewardEl.innerHTML = `<span class="coin-dot" style="width:24px;height:24px;display:inline-block;border-radius:50%;background:radial-gradient(circle at 35% 30%, #fff6c9, #ffcc33 60%, #c98f00 100%);border:2px solid var(--ink);vertical-align:middle;margin-right:8px;box-shadow:0 2px 0 var(--ink);"></span>${prize.reward} Coins`;
+      }
+      
+      // Show notification
+      notification.classList.remove("hidden");
+      
+      // Add event listener to close button
+      const closeBtn = document.getElementById("prize-close-btn");
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          notification.classList.add("hidden");
+        };
+      }
+    }
   }, 300);
 }
