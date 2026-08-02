@@ -103,7 +103,9 @@ window.loadImage = function(src) {
 // Preload images (after DOM is ready in init)
 // Images will be loaded in init() function
 
-// Save system (global)
+// Save system (global) - Now using async Capacitor-native storage
+// Note: window.save is initialized asynchronously in loadSavedPlayerData()
+// The old sync functions are kept as fallbacks for compatibility
 window.defaultSave = function() {
   return {
     bestScore: 0, coins: 0, melodies: 0, hits: 2,
@@ -112,6 +114,7 @@ window.defaultSave = function() {
   };
 }
 
+// Legacy sync functions (kept for backward compatibility)
 window.loadSave = function() {
   try {
     const raw = localStorage.getItem(window.STORAGE_KEY);
@@ -126,7 +129,14 @@ window.saveSave = function(data) {
   catch (e) { /* ignore */ }
 }
 
-window.save = window.loadSave();
+// Async save function using Capacitor Preferences
+window.saveGameState = async function() {
+  if (!window.save) return;
+  await window.saveAllGameData();
+};
+
+// Initialize save as empty object - will be populated by loadSavedPlayerData()
+window.save = {};
 
 // HUD update (global)
 window.updateHud = function() {
@@ -256,7 +266,9 @@ window.update = function(dt) {
     const cy = c.y + Math.sin(c.bob) * 8;
     if (window.circleCircleCollision(window.bird, { x: c.x, y: cy, r: c.size * 0.34 })) {
       if (window.save.hits > 0) {
-        window.save.hits--; window.saveSave(window.save); window.updateHud();
+        window.save.hits--;
+        window.saveGameState();
+        window.updateHud();
         window.cockroaches.splice(i, 1); window.bird.vy = -200;
         window.playSound(window.audioOoh);
         continue;
@@ -294,7 +306,8 @@ window.update = function(dt) {
     if (m.x < -window.MELODY_SIZE - 10) { window.melodies.splice(i, 1); continue; }
     if (!m.collected && window.circleCircleCollision(window.bird, { x: m.x, y: m.y, r: m.size * 0.42 })) {
       m.collected = true; window.melodiesThisRun++; window.save.melodies++;
-      window.saveSave(window.save); window.updateHud(); window.playSound(window.audioMelody);
+      window.saveGameState();
+      window.updateHud(); window.playSound(window.audioMelody);
       window.spawnMelodyBurst(m.x, m.y); window.melodies.splice(i, 1);
     }
   }
@@ -318,7 +331,7 @@ window.endGame = function(cause) {
   const earned = Math.max(0, Math.floor(window.score * window.COINS_PER_POINT));
   window.save.coins += earned;
   if (window.score > window.save.bestScore) window.save.bestScore = window.score;
-  window.saveSave(window.save);
+  window.saveGameState();
 
   window.goScoreEl.textContent = window.score;
   window.goBestEl.textContent = window.save.bestScore;
@@ -338,7 +351,8 @@ window.doRespawn = function() {
   const cost = window.getRespawnCost();
   if (window.save.melodies < cost) { window.flashInsufficientCoins(); return; }
   window.save.melodies -= cost; window.respawnCount++;
-  window.saveSave(window.save); window.updateHud();
+  window.saveGameState();
+  window.updateHud();
   window.bird.x = window.W * 0.28; window.bird.y = window.H * 0.42; window.bird.vy = 0; window.bird.rotation = 0;
   window.cockroaches = window.cockroaches.filter(c => c.x < window.bird.x - 200 || c.x > window.bird.x + 300);
   window.pipes = window.pipes.filter(p => p.x < window.bird.x - 200 || p.x > window.bird.x + 300);
@@ -449,8 +463,8 @@ window.resizeCanvas = function() {
   window.groundH = window.H * window.GROUND_HEIGHT_RATIO;
 }
 
-// Initialize (global)
-window.init = function() {
+// Initialize (global) - Now async to load saved data from Capacitor
+window.init = async function() {
   // Get DOM references after DOM is ready (MUST BE FIRST)
   window.app = document.getElementById("app");
   window.homeScreen = document.getElementById("home-screen");
@@ -524,6 +538,67 @@ window.init = function() {
 
   window.resizeCanvas();
   window.addEventListener("resize", window.resizeCanvas);
+
+  // ===========================================================
+  // LOAD SAVED PLAYER DATA ASYNCHRONOUSLY
+  // ===========================================================
+  await window.loadSavedPlayerData();
+  
+  // Update home screen with loaded data
+  window.homeBestScoreEl.textContent = window.save.bestScore;
+  window.homeCoinsEl.textContent = window.save.coins;
+  window.homeMelodiesEl.textContent = window.save.melodies;
+  window.homeHitsEl.textContent = window.save.hits;
+
+  // ===========================================================
+  // HARDWARE BACK BUTTON HANDLER (Capacitor)
+  // ===========================================================
+  if (window.isCapacitorAvailable() && window.Capacitor.Plugins.App) {
+    window.Capacitor.Plugins.App.addListener('backButton', () => {
+      // If game is actively running, pause it
+      if (window.state === "playing") {
+        window.playTap();
+        window.state = "paused";
+        window.pauseOverlay.classList.remove("hidden");
+        window.audioBgm.pause();
+        return;
+      }
+      
+      // If in shop or themes submenu, go back to home
+      if (window.state !== "ready" && window.state !== "paused") {
+        window.playTap();
+        window.stopPreview();
+        window.renderPickers();
+        window.showScreen("home");
+        return;
+      }
+      
+      // If on main home title menu, implement double-tap to exit
+      if (window.state === "ready" || window.state === "paused") {
+        if (!window.backButtonTimer) {
+          // First tap - show toast message
+          window.backButtonTimer = setTimeout(() => {
+            window.backButtonTimer = null;
+          }, 2000);
+          
+          // Create toast notification
+          const toast = document.createElement("div");
+          toast.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:20px 40px;border-radius:10px;font-size:18px;z-index:9999;font-family:Arial,sans-serif;";
+          toast.textContent = "Press back arrow again to exit Flappy Modi";
+          document.body.appendChild(toast);
+          
+          setTimeout(() => {
+            if (toast.parentElement) toast.parentElement.removeChild(toast);
+          }, 1500);
+        } else {
+          // Second tap within 2 seconds - exit app
+          clearTimeout(window.backButtonTimer);
+          window.backButtonTimer = null;
+          window.Capacitor.Plugins.App.exitApp();
+        }
+      }
+    });
+  }
 
   // Event listeners
   window.addEventListener("keydown", (e) => {
@@ -618,6 +693,17 @@ window.init = function() {
   window.spinBtn.addEventListener("click", window.spinRoulette);
   window.closeRouletteBtn.addEventListener("click", () => { window.stopAnimationSound(); window.hideRoulette(); window.showScreen("store"); });
   window.rouletteOverlay.addEventListener("click", (e) => { if (e.target === window.rouletteOverlay) e.stopPropagation(); });
+  
+  // Prize notification close button
+  const prizeCloseBtn = document.getElementById("prize-close-btn");
+  if (prizeCloseBtn) {
+    prizeCloseBtn.addEventListener("click", () => {
+      const notification = document.getElementById("prize-notification");
+      if (notification) {
+        notification.classList.add("hidden");
+      }
+    });
+  }
 
   // Theme observer
   const themeObserver = new MutationObserver((mutations) => {
@@ -661,9 +747,57 @@ window.init = function() {
   window.renderPickers();
 }
 
-// Start the game when DOM is ready
+// Start the game when DOM is ready - now async
+async function startGame() {
+  // Show loading screen initially
+  const loadingScreen = document.getElementById("loading-screen");
+  if (loadingScreen) {
+    loadingScreen.classList.remove("hidden");
+  }
+  
+  // Hide home screen initially until loaded
+  window.homeScreen = document.getElementById("home-screen");
+  if (window.homeScreen) {
+    window.homeScreen.classList.remove("active");
+  }
+  
+  try {
+    await window.init();
+    
+    // Small delay to show loading screen (minimum 1.5 seconds for better UX)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Hide loading screen with animation
+    if (loadingScreen) {
+      loadingScreen.classList.add("hidden");
+    }
+    
+    // Show home screen
+    if (window.homeScreen) {
+      window.homeScreen.classList.add("active");
+    }
+    
+    // Remove loading screen from DOM after animation completes
+    setTimeout(() => {
+      if (loadingScreen && loadingScreen.parentElement) {
+        loadingScreen.style.display = "none";
+      }
+    }, 500);
+    
+  } catch (error) {
+    console.error("Failed to initialize game:", error);
+    // Even on error, hide loading screen and show home
+    if (loadingScreen) {
+      loadingScreen.classList.add("hidden");
+    }
+    if (window.homeScreen) {
+      window.homeScreen.classList.add("active");
+    }
+  }
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", window.init);
+  document.addEventListener("DOMContentLoaded", startGame);
 } else {
-  window.init();
+  startGame();
 }
