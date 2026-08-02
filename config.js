@@ -29,6 +29,9 @@ window.SONGS = [
   { id: "dope",     name: "Dope Shope",            src: "audio/Dope-Shope.mp3" },
   { id: "gaddiyan", name: "Gaddiyan Uchiya Rakhiya", src: "audio/Gaddiyan-Uchiya-Rakhiya.mp3" },
   { id: "blue",     name: "Blue Eyes",             src: "audio/Blue-Eyes.mp3" },
+  { id: "pagli",    name: "Pagli Dekhawa Agarbatti", src: "audio/Pagli_dekhawe_agarbatti.mp3" },
+  { id: "naam",     name: "Naam Chale",             src: "audio/Naam_Chale.mp3" },
+  { id: "heroine",  name: "Heroine",             src: "audio/HEROINE_ft._Modi.mp3" },
 ];
 
 // Game constants
@@ -86,6 +89,121 @@ window.getDefaultSave = function() {
 
 // Storage key
 window.STORAGE_KEY = "flappyModiSave_v1";
+
+// ===========================================================
+// CAPACITOR NATIVE STORAGE WRAPPER
+// Provides async storage with Capacitor Preferences fallback to localStorage
+// ===========================================================
+
+// Detect if Capacitor is available
+window.isCapacitorAvailable = function() {
+  return typeof window.Capacitor !== "undefined" && 
+         window.Capacitor.Plugins && 
+         window.Capacitor.Plugins.Preferences;
+};
+
+// Async setter - automatically handles JSON stringification
+window.setGameValue = async function(key, value) {
+  try {
+    if (window.isCapacitorAvailable()) {
+      const stringValue = typeof value === "string" ? value : JSON.stringify(value);
+      await window.Capacitor.Plugins.Preferences.set({ key, value: stringValue });
+    } else {
+      // Fallback to localStorage for web browsers
+      const stringValue = typeof value === "string" ? value : JSON.stringify(value);
+      localStorage.setItem(key, stringValue);
+    }
+  } catch (error) {
+    console.error(`Failed to save ${key}:`, error);
+    // Fallback to localStorage on error
+    try {
+      const stringValue = typeof value === "string" ? value : JSON.stringify(value);
+      localStorage.setItem(key, stringValue);
+    } catch (e) {
+      console.error(`Fallback save also failed for ${key}:`, e);
+    }
+  }
+};
+
+// Async getter - automatically parses JSON objects/arrays and numbers
+window.getGameValue = async function(key, defaultValue) {
+  try {
+    let stringValue;
+    if (window.isCapacitorAvailable()) {
+      const result = await window.Capacitor.Plugins.Preferences.get({ key });
+      stringValue = result.value;
+    } else {
+      // Fallback to localStorage for web browsers
+      stringValue = localStorage.getItem(key);
+    }
+
+    if (stringValue === null || stringValue === undefined) {
+      return defaultValue;
+    }
+
+    // Try to parse as JSON (for objects, arrays, numbers)
+    try {
+      const parsed = JSON.parse(stringValue);
+      return parsed;
+    } catch (e) {
+      // If parsing fails, return as string
+      return stringValue;
+    }
+  } catch (error) {
+    console.error(`Failed to load ${key}:`, error);
+    // Fallback to localStorage on error
+    try {
+      const stringValue = localStorage.getItem(key);
+      if (stringValue === null || stringValue === undefined) {
+        return defaultValue;
+      }
+      try {
+        const parsed = JSON.parse(stringValue);
+        return parsed;
+      } catch (e) {
+        return stringValue;
+      }
+    } catch (e) {
+      console.error(`Fallback load also failed for ${key}:`, e);
+      return defaultValue;
+    }
+  }
+};
+
+// Async function to load all saved player data
+window.loadSavedPlayerData = async function() {
+  const defaultData = window.getDefaultSave();
+  
+  // Load each value with defaults
+  window.save = {
+    bestScore: await window.getGameValue("bestScore", defaultData.bestScore),
+    coins: await window.getGameValue("coins", defaultData.coins),
+    melodies: await window.getGameValue("melodies", defaultData.melodies),
+    hits: await window.getGameValue("hits", defaultData.hits),
+    unlockedThemes: await window.getGameValue("unlockedThemes", defaultData.unlockedThemes),
+    unlockedVehicles: await window.getGameValue("unlockedVehicles", defaultData.unlockedVehicles),
+    selectedTheme: await window.getGameValue("selectedTheme", defaultData.selectedTheme),
+    selectedVehicle: await window.getGameValue("selectedVehicle", defaultData.selectedVehicle),
+    selectedSong: await window.getGameValue("selectedSong", defaultData.selectedSong),
+  };
+  
+  return window.save;
+};
+
+// Async function to save all player data
+window.saveAllGameData = async function() {
+  if (!window.save) return;
+  
+  await window.setGameValue("bestScore", window.save.bestScore);
+  await window.setGameValue("coins", window.save.coins);
+  await window.setGameValue("melodies", window.save.melodies);
+  await window.setGameValue("hits", window.save.hits);
+  await window.setGameValue("unlockedThemes", window.save.unlockedThemes);
+  await window.setGameValue("unlockedVehicles", window.save.unlockedVehicles);
+  await window.setGameValue("selectedTheme", window.save.selectedTheme);
+  await window.setGameValue("selectedVehicle", window.save.selectedVehicle);
+  await window.setGameValue("selectedSong", window.save.selectedSong);
+};
 
 // Game constants shorthand
 window.GRAVITY = window.GAME_CONFIG.GRAVITY;
