@@ -33,10 +33,11 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
   <img src="https://github.com/user-attachments/assets/da410a14-c0fc-4c2b-8904-a81ee2b07993" width="45.3%">
 
 <br>
-  <img src="https://github.com/user-attachments/assets/50bdbe61-87db-4327-8a83-a153ad92143b" width="38.5%">
-  <img src="https://github.com/user-attachments/assets/aee60940-084a-47b4-8c2f-ea65708d5774" width="57.5%">
+  <img src="https://github.com/user-attachments/assets/d609c5ab-32f4-4082-b4e7-57b90a809c9d" width="38.8%">
+  <img src="https://github.com/user-attachments/assets/aee60940-084a-47b4-8c2f-ea65708d5774" width="57.2%">
 
 </p>
+
 
   Play the Game : https://akash098p.github.io/flappy-modi/
 
