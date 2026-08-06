@@ -78,6 +78,9 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - Dope Shope
 - Gaddiyan Uchiya Rakhiya
 - Blue Eyes
+- Pagli Dekhawa Agarbatti
+- Naam Chale
+- Heroine 
 
 ## 🛒 Store Items
 
