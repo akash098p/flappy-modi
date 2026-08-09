@@ -39,9 +39,11 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 </p>
 
 
-  Play the Game : https://akash098p.github.io/flappy-modi/
+  Play the Game : 🟢[PLAY!](https://akash098p.github.io/flappy-modi)
   
-  Download for Android from here : https://akash098p.itch.io/flappy-modi
+  Download for Android from here : 🔴[DOWNLOAD!](https://akash098p.itch.io/flappy-modi)
+
+
 
 ## 🎯 Gameplay
 
