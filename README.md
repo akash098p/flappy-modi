@@ -1,15 +1,16 @@
 # Flappy Modi
 
+A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and music. Built with vanilla JavaScript and HTML5 Canvas for smooth mobile gameplay.
+
 <p align="center">
-  
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Canvas](https://img.shields.io/badge/Canvas-FF6B6B?style=for-the-badge&logo=html5&logoColor=white)
-![Mobile](https://img.shields.io/badge/Mobile-Responsive-green?style=for-the-badge&logo=mobile&logoColor=white)
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/Canvas-000000?style=for-the-badge&logo=html5&logoColor=white" alt="Canvas" />
+  <img src="https://img.shields.io/badge/Mobile-Responsive-green?style=for-the-badge&logo=mobile&logoColor=white" alt="Mobile" />
 </p>
 
-A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and music. Built with vanilla JavaScript and HTML5 Canvas for smooth mobile gameplay.
+---
 
 ## 🎮 Features
 
@@ -22,6 +23,7 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - **Responsive Design**: Optimized for mobile devices with touch controls
 - **Persistent Progress**: Local storage saves your coins, melodies, and unlocks
 
+---
 
 ## 📸 Screenshots
 
@@ -38,12 +40,35 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 
 </p>
 
+---
 
   Play the Game : 🟢[PLAY!](https://akash098p.github.io/flappy-modi)
   
   Download for free here : 🔴[DOWNLOAD!](https://akash098p.itch.io/flappy-modi)
+  <table width="100%">
+  <tr>
+    <td align="center" valign="middle" width="240" bgcolor="#525252">
+      <a href="https://akash098p.itch.io/route-master">
+        <img src="https://github.com/user-attachments/assets/e4e1d70e-75d9-4d6a-b2e1-c60845ec2aa5" width="220" alt="Route Master Cover">
+      </a>
+    </td>
+    <td valign="middle" bgcolor="#525252">
+      <h3 align="left">
+        <a href="https://akash098p.itch.io/route-master">Route Master</a>
+      </h3>
+      <p align="left">
+        A game by <a href="https://akash098p.itch.io">Akash Pramanik</a>
+      </p>
+      <p align="left">
+        <a href="https://akash098p.itch.io/route-master">
+          <img src="https://img.shields.io/badge/Play_on-itch.io-ff0b0b?style=for-the-badge&logo=itch.io&logoColor=white" alt="Play on itch.io">
+        </a>
+      </p>
+    </td>
+  </tr>
+</table>
 
-
+---
 
 ## 🎯 Gameplay
 
@@ -53,6 +78,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - **Earn coins** based on your score
 - **Buy hits** in the store to protect from cockroaches
 - **Purchase melody packs** to spin the roulette and win prizes
+
+---
 
 ## 🎨 Themes
 
@@ -65,6 +92,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Diwali | 45 Coins |  |
 | Independence Day | 55 Coins | |
 
+---
+
 ## ✈️ Vehicles
 
 | Vehicle | Cost | Description |
@@ -74,6 +103,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Car | 30 Coins | Taxi |
 | Scooty | 45 Coins | Scooty | 
 | Tejas | 60 Coins | Advanced jet aircraft |
+
+---
 
 ## 🎵 Soundtracks
 
@@ -86,10 +117,14 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - Naam Chale
 - Heroine 
 
+---
+
 ## 🛒 Store Items
 
 - **1 Hit** - 5 Coins: Protects from one cockroach collision
 - **Melody Pack** - 50 Coins: Spin the roulette to win 2-15 melodies or 20 coins
+
+---
 
 ## 🎰 Roulette Prizes
 
@@ -101,6 +136,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | 20 Coins | 20% |
 | 10 Melodies | 8% |
 | 15 Melodies | 5% |
+
+---
 
 ## 🚀 Getting Started
 
