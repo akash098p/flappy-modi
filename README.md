@@ -12,19 +12,6 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 
 ---
 
-## 🎮 Features
-
-- **5 Unique Themes**: Day, Night, Desert, Ocean, and Festival themes with dynamic backgrounds
-- **3 Vehicles**: Choose from Wing, Helicopter, and Tejas aircraft
-- **5 Soundtracks**: Popular Indian songs as background music
-- **Melody Collection**: Collect rare melodies during gameplay
-- **Hit System**: Protect yourself from cockroach collisions
-- **Melody Pack Roulette**: Spin to win melodies and coins
-- **Responsive Design**: Optimized for mobile devices with touch controls
-- **Persistent Progress**: Local storage saves your coins, melodies, and unlocks
-
----
-
 ## 📸 Screenshots
 
 <p align="center">
@@ -67,6 +54,19 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
     </td>
   </tr>
 </table>
+
+---
+
+## 🎮 Features
+
+- **5 Unique Themes**: Day, Night, Desert, Ocean, and Festival themes with dynamic backgrounds
+- **3 Vehicles**: Choose from Wing, Helicopter, and Tejas aircraft
+- **5 Soundtracks**: Popular Indian songs as background music
+- **Melody Collection**: Collect rare melodies during gameplay
+- **Hit System**: Protect yourself from cockroach collisions
+- **Melody Pack Roulette**: Spin to win melodies and coins
+- **Responsive Design**: Optimized for mobile devices with touch controls
+- **Persistent Progress**: Local storage saves your coins, melodies, and unlocks
 
 ---
 
