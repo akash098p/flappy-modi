@@ -65,7 +65,7 @@ window.saveAudioSettings = function() {
 // Base volumes for each audio element (multiplied by user's setting)
 window.SFX_AUDIO_IDS = [
   ["audioJump", 0.7], ["audioGameover", 0.8], ["audioStart", 0.8],
-  ["audioMelody", 0.9], ["audioTap", 0.7], ["audioPurchase", 0.8],
+  ["audioMelody", 0.9], ["audioFahhh", 0.9], ["audioTap", 0.7], ["audioPurchase", 0.8],
   ["audioOoh", 0.85], ["audioKya", 0.9], ["audioRewards", 0.8],
   ["audioWhaKyaSceneHai", 0.9], ["audioGiveUp", 0.8],
 ];
@@ -731,6 +731,7 @@ window.init = async function() {
   window.loadImage("images/melody .png");
   window.loadImage("images/hit.png");
   window.loadImage("images/logo.png");
+  window.loadImage("images/intrologo.jpg");
 
   // Home bg will be started after intro video finishes (in finishIntro)
   // Do NOT start it on first interaction here - that would conflict with intro video
@@ -755,14 +756,16 @@ window.finishIntro = function() {
   
   if (loadingScreen) {
     loadingScreen.classList.add("hidden");
+    // Reset pointer events in case it was disabled during intro
+    loadingScreen.style.pointerEvents = "";
   }
   
   if (homeScreen) {
     homeScreen.classList.add("active");
   }
   
-  // Start home background music when arriving at home screen
-  window.playHomeBg();
+  // Play the short intro voice, then start the home background music
+  window.playIntroAudioSequence();
   
   // Remove loading screen from DOM after animation completes
   setTimeout(() => {
@@ -799,39 +802,56 @@ async function startGame() {
     const skipBtn = document.getElementById("skip-intro-btn");
     
     if (introVideo) {
-      // Play video muted (browser autoplay policy requires this for autoplay)
-      introVideo.muted = true;
-      introVideo.volume = 0.8;
-      introVideo.play().catch(() => {});
+      const tapToStartOverlay = document.getElementById("tap-to-start-overlay");
+      const tapToStartBtn = document.getElementById("tap-to-start-btn");
+      let introStarted = false;
       
-      // When user clicks anywhere on the loading screen, play video with sound
-      // (browser allows unmuted playback in response to user gesture)
-      const playVideoWithSound = () => {
-        if (introVideo.muted) {
-          introVideo.muted = false;
-          introVideo.volume = 0.8;
-          // Re-play to ensure audio starts with the user gesture
-          introVideo.play().catch(() => {});
+      // Show the Tap to Start overlay first (video is hidden, no autoplay)
+      if (tapToStartOverlay) tapToStartOverlay.classList.remove("hidden");
+      
+      // Start intro video WITH SOUND on "Tap to Start" button
+      // (browser allows unmuted playback in response to a user gesture)
+      const startIntroWithSound = () => {
+        if (introStarted) return;
+        introStarted = true;
+        
+        // Show the video (remove hidden class) and play with sound
+        introVideo.classList.remove("hidden");
+        introVideo.muted = false;
+        introVideo.volume = 0.8;
+        introVideo.currentTime = 0;
+        introVideo.play().catch(() => {});
+        
+        // Hide the Tap to Start overlay
+        if (tapToStartOverlay) tapToStartOverlay.classList.add("hidden");
+        
+        // Disable touch response in the intro page so tapping does NOT pause the video
+        if (loadingScreen) {
+          loadingScreen.style.pointerEvents = "none";
         }
-        document.removeEventListener("pointerdown", playVideoWithSound);
-        document.removeEventListener("keydown", playVideoWithSound);
-        document.removeEventListener("touchstart", playVideoWithSound);
+        if (skipBtn) {
+          skipBtn.style.pointerEvents = "auto";
+        }
+        
+        // Show skip button after 4 seconds
+        setTimeout(() => {
+          if (skipBtn && !loadingScreen?.classList.contains("hidden")) {
+            skipBtn.classList.remove("hidden");
+          }
+        }, 4000);
+        
+        // Auto-finish intro after 10 seconds
+        setTimeout(() => {
+          window.finishIntro();
+        }, 10000);
       };
-      document.addEventListener("pointerdown", playVideoWithSound);
-      document.addEventListener("keydown", playVideoWithSound);
-      document.addEventListener("touchstart", playVideoWithSound);
       
-      // Show skip button after 4 seconds
-      setTimeout(() => {
-        if (skipBtn && !loadingScreen?.classList.contains("hidden")) {
-          skipBtn.classList.remove("hidden");
-        }
-      }, 4000);
-      
-      // Auto-finish intro after 10 seconds
-      setTimeout(() => {
-        window.finishIntro();
-      }, 10000);
+      if (tapToStartBtn) {
+        tapToStartBtn.addEventListener("click", startIntroWithSound);
+      }
+      if (tapToStartOverlay) {
+        tapToStartOverlay.addEventListener("click", startIntroWithSound);
+      }
     }
     
     // Skip button click handler
