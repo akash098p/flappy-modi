@@ -13,17 +13,23 @@
 
   <!-- ===================== LOADING SCREEN ===================== -->
   <div id="loading-screen" class="loading-screen">
-    <video id="intro-video" class="intro-video" src="audio/main game background intro.mp4" playsinline preload="auto"></video>
+    <video id="intro-video" class="intro-video hidden" src="audio/main game background intro.mp4" playsinline preload="auto"></video>
     <div class="loading-content">
-      <img class="loading-logo" src="images/logo.png" alt="Flappy Modi" />
-      <h1 class="loading-title">FLAPPY MODI</h1>
+      <img class="loading-logo" src="images/intrologo.jpg" alt="Flappy Modi" />
       <div class="loading-spinner">
         <div class="spinner-dot"></div>
         <div class="spinner-dot"></div>
         <div class="spinner-dot"></div>
       </div>
     </div>
-    <button id="skip-intro-btn" class="skip-intro-btn hidden">Skip ▶</button>
+    <button id="skip-intro-btn" class="skip-intro-btn hidden">Skip Intro ▶</button>
+    <div id="tap-to-start-overlay" class="tap-to-start-overlay">
+      <div class="tap-to-start-inner">
+        <img class="tap-to-start-logo" src="images/logo.png" alt="Flappy Modi" />
+        <h1 class="tap-to-start-title">FLAPPY MODI</h1>
+        <button id="tap-to-start-btn" class="tap-to-start-btn">▶ Tap to Start</button>
+      </div>
+    </div>
   </div>
 
   <!-- ===================== HOME SCREEN ===================== -->
@@ -278,6 +284,7 @@
 <audio id="audio-gameover" src="audio/gameover.mp3" preload="auto"></audio>
 <audio id="audio-start" src="audio/start.mp3" preload="auto"></audio>
 <audio id="audio-melody" src="audio/melody.mp3" preload="auto"></audio>
+<audio id="audio-fahhh" src="audio/fahhh.mp3" preload="auto"></audio>
 <audio id="audio-homebg" src="audio/main home bg.mp3" preload="auto" loop></audio>
 <audio id="audio-tap" src="audio/tap.mp3" preload="auto"></audio>
 <audio id="audio-purchase" src="audio/purchase.mp3" preload="auto"></audio>
