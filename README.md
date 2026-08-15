@@ -86,11 +86,11 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Theme | Cost | Description |
 |-------|------|-------------|
 | Day | Free | Classic bright sky with blue pipes |
-| Night | 15 Coins | Dark atmosphere with purple accents |
-| Desert | 25 Coins | Warm orange sunset vibes |
-| Ocean | 35 Coins | Cool blue underwater theme |
-| Diwali | 45 Coins |  |
-| Independence Day | 55 Coins | |
+| Night | 20 Coins | Dark atmosphere with purple accents |
+| Desert | 30 Coins | Warm orange sunset vibes |
+| Ocean | 40 Coins | Cool blue underwater theme |
+| Diwali | 50 Coins |  |
+| Independence Day | 60 Coins | |
 
 ---
 
@@ -99,7 +99,7 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Vehicle | Cost | Description |
 |---------|------|-------------|
 | Wing | Free | Classic flappy bird style |
-| Helicopter | 20 Coins | Rotor-based flying machine |
+| Helicopter | 15 Coins | Rotor-based flying machine |
 | Car | 30 Coins | Taxi |
 | Scooty | 45 Coins | Scooty | 
 | Tejas | 60 Coins | Advanced jet aircraft |
@@ -113,6 +113,7 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - Dope Shope
 - Gaddiyan Uchiya Rakhiya
 - Blue Eyes
+- Gehra Hua
 - Pagli Dekhawa Agarbatti
 - Naam Chale
 - Heroine 
