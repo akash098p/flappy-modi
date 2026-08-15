@@ -19,7 +19,7 @@ window.currentVehicleImg = null;
 window.respawnCount = 0;
 window.cockroachSoundToggle = false;
 window.respawnTimerId = null;
-window.respawnTimeLeft = 3;
+window.respawnTimeLeft = 5;
 
 // DOM element references (global)
 window.app = null; window.homeScreen = null; window.gameScreen = null; window.themeScreen = null; window.vehicleScreen = null; window.songScreen = null; window.storeScreen = null;
@@ -67,6 +67,7 @@ window.SFX_AUDIO_IDS = [
   ["audioJump", 0.7], ["audioGameover", 0.8], ["audioStart", 0.8],
   ["audioMelody", 0.9], ["audioTap", 0.7], ["audioPurchase", 0.8],
   ["audioOoh", 0.85], ["audioKya", 0.9], ["audioRewards", 0.8],
+  ["audioWhaKyaSceneHai", 0.9], ["audioGiveUp", 0.8],
 ];
 window.BGM_AUDIO_IDS = [
   ["audioBgm", 0.88], ["audioHomeBg", 0.9], ["audioPreview", 0.5], ["audioAnimation", 0.7],
@@ -359,6 +360,7 @@ window.doRespawn = function() {
   window.respawnOverlay.classList.add("hidden");
   window.state = "playing";
   window.lastTime = performance.now();
+  window.playSound(window.audioWhaKyaSceneHai);
   window.audioBgm.play().catch(() => {});
 }
 
@@ -379,8 +381,8 @@ window.showRespawnOverlay = function() {
 
 window.startRespawnTimer = function() {
   window.clearRespawnTimer();
-  window.respawnTimeLeft = 3;
-  window.respawnTimerTextEl.textContent = "3";
+  window.respawnTimeLeft = 5;
+  window.respawnTimerTextEl.textContent = "5";
   window.respawnTimerEl.classList.remove("hidden");
   window.respawnTimerEl.style.animation = "none";
   void window.respawnTimerEl.offsetWidth;
@@ -627,6 +629,7 @@ window.init = async function() {
   window.respawnBtn.addEventListener("click", () => { window.playTap(); window.clearRespawnTimer(); window.doRespawn(); });
   window.noRespawnBtn.addEventListener("click", () => {
     window.playTap(); window.clearRespawnTimer();
+    window.playSound(window.audioGiveUp);
     window.respawnOverlay.classList.add("hidden");
     window.state = "gameover";
     window.gameoverOverlay.classList.remove("hidden");
@@ -691,7 +694,7 @@ window.init = async function() {
   });
 
   window.spinBtn.addEventListener("click", window.spinRoulette);
-  window.closeRouletteBtn.addEventListener("click", () => { window.stopAnimationSound(); window.hideRoulette(); window.showScreen("store"); });
+  window.closeRouletteBtn.addEventListener("click", () => { window.playTap(); window.stopAnimationSound(); window.hideRoulette(); window.showScreen("store"); });
   window.rouletteOverlay.addEventListener("click", (e) => { if (e.target === window.rouletteOverlay) e.stopPropagation(); });
   
   // Prize notification close button
@@ -729,22 +732,49 @@ window.init = async function() {
   window.loadImage("images/hit.png");
   window.loadImage("images/logo.png");
 
-  // Start home bg on first interaction
-  function startHomeBgOnFirstInteraction() {
-    window.playHomeBg();
-    document.removeEventListener("pointerdown", startHomeBgOnFirstInteraction);
-    document.removeEventListener("keydown", startHomeBgOnFirstInteraction);
-    document.removeEventListener("touchstart", startHomeBgOnFirstInteraction);
-  }
-  document.addEventListener("pointerdown", startHomeBgOnFirstInteraction, { once: true });
-  document.addEventListener("keydown", startHomeBgOnFirstInteraction, { once: true });
-  document.addEventListener("touchstart", startHomeBgOnFirstInteraction, { once: true });
+  // Home bg will be started after intro video finishes (in finishIntro)
+  // Do NOT start it on first interaction here - that would conflict with intro video
 
   // Initialize game
   window.buildThemeDecorations();
   window.addEventListener("resize", window.buildThemeDecorations);
   window.applyTheme(window.save.selectedTheme);
   window.renderPickers();
+}
+
+// Intro video helpers (global)
+window.finishIntro = function() {
+  const loadingScreen = document.getElementById("loading-screen");
+  const introVideo = document.getElementById("intro-video");
+  const homeScreen = document.getElementById("home-screen");
+  
+  if (introVideo) {
+    introVideo.pause();
+    introVideo.currentTime = 0;
+  }
+  
+  if (loadingScreen) {
+    loadingScreen.classList.add("hidden");
+  }
+  
+  if (homeScreen) {
+    homeScreen.classList.add("active");
+  }
+  
+  // Start home background music when arriving at home screen
+  window.playHomeBg();
+  
+  // Remove loading screen from DOM after animation completes
+  setTimeout(() => {
+    if (loadingScreen && loadingScreen.parentElement) {
+      loadingScreen.style.display = "none";
+    }
+  }, 500);
+}
+
+window.skipIntro = function() {
+  window.playTap();
+  window.finishIntro();
 }
 
 // Start the game when DOM is ready - now async
@@ -764,35 +794,54 @@ async function startGame() {
   try {
     await window.init();
     
-    // Small delay to show loading screen (minimum 1.5 seconds for better UX)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Play intro video with sound
+    const introVideo = document.getElementById("intro-video");
+    const skipBtn = document.getElementById("skip-intro-btn");
     
-    // Hide loading screen with animation
-    if (loadingScreen) {
-      loadingScreen.classList.add("hidden");
+    if (introVideo) {
+      // Play video muted (browser autoplay policy requires this for autoplay)
+      introVideo.muted = true;
+      introVideo.volume = 0.8;
+      introVideo.play().catch(() => {});
+      
+      // When user clicks anywhere on the loading screen, play video with sound
+      // (browser allows unmuted playback in response to user gesture)
+      const playVideoWithSound = () => {
+        if (introVideo.muted) {
+          introVideo.muted = false;
+          introVideo.volume = 0.8;
+          // Re-play to ensure audio starts with the user gesture
+          introVideo.play().catch(() => {});
+        }
+        document.removeEventListener("pointerdown", playVideoWithSound);
+        document.removeEventListener("keydown", playVideoWithSound);
+        document.removeEventListener("touchstart", playVideoWithSound);
+      };
+      document.addEventListener("pointerdown", playVideoWithSound);
+      document.addEventListener("keydown", playVideoWithSound);
+      document.addEventListener("touchstart", playVideoWithSound);
+      
+      // Show skip button after 4 seconds
+      setTimeout(() => {
+        if (skipBtn && !loadingScreen?.classList.contains("hidden")) {
+          skipBtn.classList.remove("hidden");
+        }
+      }, 4000);
+      
+      // Auto-finish intro after 10 seconds
+      setTimeout(() => {
+        window.finishIntro();
+      }, 10000);
     }
     
-    // Show home screen
-    if (window.homeScreen) {
-      window.homeScreen.classList.add("active");
+    // Skip button click handler
+    if (skipBtn) {
+      skipBtn.addEventListener("click", window.skipIntro);
     }
-    
-    // Remove loading screen from DOM after animation completes
-    setTimeout(() => {
-      if (loadingScreen && loadingScreen.parentElement) {
-        loadingScreen.style.display = "none";
-      }
-    }, 500);
     
   } catch (error) {
     console.error("Failed to initialize game:", error);
-    // Even on error, hide loading screen and show home
-    if (loadingScreen) {
-      loadingScreen.classList.add("hidden");
-    }
-    if (window.homeScreen) {
-      window.homeScreen.classList.add("active");
-    }
+    window.finishIntro();
   }
 }
 
