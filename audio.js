@@ -16,6 +16,8 @@ window.audioOoh = document.getElementById("audio-ooh");
 window.audioKya = document.getElementById("audio-kya");
 window.audioAnimation = document.getElementById("audio-animation");
 window.audioRewards = document.getElementById("audio-rewards");
+window.audioWhaKyaSceneHai = document.getElementById("audio-wha-kya-scene-hai");
+window.audioGiveUp = document.getElementById("audio-give-up");
 
 // Volume settings
 window.audioBgm.volume = 0.88;
@@ -31,6 +33,8 @@ window.audioOoh.volume = 0.85;
 window.audioKya.volume = 0.9;
 window.audioAnimation.volume = 0.7;
 window.audioRewards.volume = 0.8;
+window.audioWhaKyaSceneHai.volume = 0.9;
+window.audioGiveUp.volume = 0.8;
 
 // Play sound helper (global)
 window.playSound = function(el) {
