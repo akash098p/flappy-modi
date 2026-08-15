@@ -203,7 +203,7 @@ window.showRoulette = function() {
   window.spinBtn.textContent = "SPIN!";
   window.buildRouletteTrack();
   window.rouletteTrack.style.transition = "none";
-  window.rouletteTrack.style.transform = "translateY(0)";
+  window.rouletteTrack.style.transform = "translateX(0)";
   window.spinBtn.style.display = "flex";
   window.closeRouletteBtn.style.display = "none";
 }
@@ -226,6 +226,7 @@ window.buildRouletteTrack = function() {
     ROULETTE_PRIZES.forEach(prize => {
       const prizeEl = document.createElement("div");
       prizeEl.className = "roulette-prize";
+      
       prizeEl.innerHTML = `
         <div class="roulette-prize-icon"><img src="${prize.icon}" alt="${prize.label}" /></div>
         <div class="roulette-prize-text">${prize.label}</div>
@@ -268,7 +269,12 @@ window.spinRoulette = function() {
   const centerOffset = (containerWidth - prizeWidth) / 2;
   
   // Calculate target position for winning prize to be centered
-  const targetPosition = (prizeIndex * prizeWidth) + centerOffset;
+  // The track moves left by finalX, so prize's left edge lands at (prizeIndex * prizeWidth - finalX).
+  // For the prize center to align with the pointer (containerWidth / 2):
+  //   prizeIndex * prizeWidth - finalX + prizeWidth / 2 = containerWidth / 2
+  //   finalX = prizeIndex * prizeWidth - (containerWidth - prizeWidth) / 2
+  // So we SUBTRACT centerOffset, not add it.
+  const targetPosition = (prizeIndex * prizeWidth) - centerOffset;
   
   // Add multiple full rotations for dramatic effect (infinity scroll)
   const fullRotations = 8;
@@ -315,7 +321,7 @@ window.awardPrize = async function(prize) {
       if (prize.type === "melody") {
         rewardEl.innerHTML = `<img src="images/melody .png" alt="melody" />${prize.reward} Melodies`;
       } else if (prize.type === "coin") {
-        rewardEl.innerHTML = `<span class="coin-dot" style="width:24px;height:24px;display:inline-block;border-radius:50%;background:radial-gradient(circle at 35% 30%, #fff6c9, #ffcc33 60%, #c98f00 100%);border:2px solid var(--ink);vertical-align:middle;margin-right:8px;box-shadow:0 2px 0 var(--ink);"></span>${prize.reward} Coins`;
+        rewardEl.innerHTML = `<img src="images/coin.png" alt="coin" />${prize.reward} Coins`;
       }
       
       // Show notification
@@ -325,6 +331,7 @@ window.awardPrize = async function(prize) {
       const closeBtn = document.getElementById("prize-close-btn");
       if (closeBtn) {
         closeBtn.onclick = () => {
+          window.playTap();
           notification.classList.add("hidden");
         };
       }
