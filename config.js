@@ -6,11 +6,11 @@
 // Theme definitions - just add new theme objects here
 window.THEMES = [
   { id: "day",      name: "Day",      cost: 0,   swatch: "linear-gradient(180deg,#7ed6ff,#ffe9a8)" },
-  { id: "night",    name: "Night",    cost: 15,  swatch: "linear-gradient(180deg,#0d1b3e,#3a3f7a)" },
-  { id: "desert",   name: "Desert",   cost: 25,  swatch: "linear-gradient(180deg,#ffd58a,#ff9a56)" },
-  { id: "ocean",    name: "Ocean",    cost: 35,  swatch: "linear-gradient(180deg,#bdf0ff,#4fb8d6)" },
-  { id: "diwali",   name: "Diwali",   cost: 45,  swatch: "linear-gradient(180deg,#1a0a2e,#ff6b35)" },
-  { id: "independence", name: "Independence Day", cost: 55, swatch: "linear-gradient(180deg,#ff9933,#ffffff,#138808)" },
+  { id: "night",    name: "Night",    cost: 20,  swatch: "linear-gradient(180deg,#0d1b3e,#3a3f7a)" },
+  { id: "desert",   name: "Desert",   cost: 30,  swatch: "linear-gradient(180deg,#ffd58a,#ff9a56)" },
+  { id: "ocean",    name: "Ocean",    cost: 40,  swatch: "linear-gradient(180deg,#bdf0ff,#4fb8d6)" },
+  { id: "diwali",   name: "Diwali",   cost: 50,  swatch: "linear-gradient(180deg,#1a0a2e,#ff6b35)" },
+  { id: "independence", name: "Independence Day", cost: 60, swatch: "linear-gradient(180deg,#ff9933,#ffffff,#138808)" },
 ];
 
 // Vehicle definitions - just add new vehicle objects here
@@ -29,6 +29,7 @@ window.SONGS = [
   { id: "dope",     name: "Dope Shope",            src: "audio/Dope-Shope.mp3" },
   { id: "gaddiyan", name: "Gaddiyan Uchiya Rakhiya", src: "audio/Gaddiyan-Uchiya-Rakhiya.mp3" },
   { id: "blue",     name: "Blue Eyes",             src: "audio/Blue-Eyes.mp3" },
+  { id: "gehra",     name: "Gehra Hua",             src: "audio/Gehra hua.mp3" },
   { id: "pagli",    name: "Pagli Dekhawa Agarbatti", src: "audio/Pagli_dekhawe_agarbatti.mp3" },
   { id: "naam",     name: "Naam Chale",             src: "audio/Naam_Chale.mp3" },
   { id: "heroine",  name: "Heroine",             src: "audio/HEROINE_ft._Modi.mp3" },
@@ -67,7 +68,7 @@ window.ROULETTE_PRIZES = [
   { id: 1, label: "2 Melodies",  icon: "images/melody .png", reward: 2,  type: "melody", chance: 0.34 },
   { id: 2, label: "4 Melodies",  icon: "images/melody .png", reward: 4,  type: "melody", chance: 0.19 },
   { id: 3, label: "5 Melodies",  icon: "images/melody .png", reward: 5,  type: "melody", chance: 0.14 },
-  { id: 4, label: "20 Coins",    icon: "images/hit.png",     reward: 20, type: "coin",   chance: 0.20 },
+  { id: 4, label: "20 Coins",    icon: "images/coin.png",    reward: 20, type: "coin",   chance: 0.20 },
   { id: 5, label: "10 Melodies", icon: "images/melody .png", reward: 10, type: "melody", chance: 0.08 },
   { id: 6, label: "15 Melodies", icon: "images/melody .png", reward: 15, type: "melody", chance: 0.05 },
 ];
