@@ -8,6 +8,7 @@ window.audioBgm = document.getElementById("audio-bgm");
 window.audioGameover = document.getElementById("audio-gameover");
 window.audioStart = document.getElementById("audio-start");
 window.audioMelody = document.getElementById("audio-melody");
+window.audioFahhh = document.getElementById("audio-fahhh");
 window.audioHomeBg = document.getElementById("audio-homebg");
 window.audioTap = document.getElementById("audio-tap");
 window.audioPurchase = document.getElementById("audio-purchase");
@@ -25,6 +26,7 @@ window.audioJump.volume = 0.7;
 window.audioGameover.volume = 0.8;
 window.audioStart.volume = 0.8;
 window.audioMelody.volume = 0.9;
+window.audioFahhh.volume = 0.9;
 window.audioHomeBg.volume = 0.9;
 window.audioTap.volume = 0.7;
 window.audioPurchase.volume = 0.8;
@@ -46,6 +48,25 @@ window.playSound = function(el) {
 
 window.playTap = function() { window.playSound(window.audioTap); }
 window.playPurchase = function() { window.playSound(window.audioPurchase); }
+
+window.playIntroAudioSequence = function() {
+  try {
+    window.audioHomeBg.pause();
+    window.audioHomeBg.currentTime = 0;
+
+    if (!window.audioFahhh) return window.playHomeBg();
+
+    window.audioFahhh.onended = function() {
+      window.audioFahhh.onended = null;
+      window.playHomeBg();
+    };
+
+    window.audioFahhh.currentTime = 0;
+    window.audioFahhh.play().catch(() => window.playHomeBg());
+  } catch (e) {
+    window.playHomeBg();
+  }
+}
 
 // Game background music — uses the selected song (global)
 window.playBgm = function() {
