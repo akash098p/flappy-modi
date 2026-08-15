@@ -13,6 +13,7 @@
 
   <!-- ===================== LOADING SCREEN ===================== -->
   <div id="loading-screen" class="loading-screen">
+    <video id="intro-video" class="intro-video" src="audio/main game background intro.mp4" playsinline preload="auto"></video>
     <div class="loading-content">
       <img class="loading-logo" src="images/logo.png" alt="Flappy Modi" />
       <h1 class="loading-title">FLAPPY MODI</h1>
@@ -22,6 +23,7 @@
         <div class="spinner-dot"></div>
       </div>
     </div>
+    <button id="skip-intro-btn" class="skip-intro-btn hidden">Skip ▶</button>
   </div>
 
   <!-- ===================== HOME SCREEN ===================== -->
@@ -284,6 +286,8 @@
 <audio id="audio-kya" src="audio/kya-takleef-hai-bhai.mp3" preload="auto"></audio>
 <audio id="audio-animation" src="audio/animation.mp3" preload="auto" loop></audio>
 <audio id="audio-rewards" src="audio/rewards.mp3" preload="auto"></audio>
+<audio id="audio-wha-kya-scene-hai" src="audio/wha-kya-scene-hai.mp3" preload="auto"></audio>
+<audio id="audio-give-up" src="audio/give up.mp3" preload="auto"></audio>
 
   <!-- Load game modules in order -->
   <script src="config.js"></script>
