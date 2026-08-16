@@ -100,8 +100,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 |---------|------|-------------|
 | Wing | Free | Classic flappy bird style |
 | Helicopter | 15 Coins | Rotor-based flying machine |
-| Car | 30 Coins | Taxi |
-| Scooty | 45 Coins | Scooty | 
+| Car | 30 Coins |  |
+| Scooty | 45 Coins |  | 
 | Tejas | 60 Coins | Advanced jet aircraft |
 
 ---
