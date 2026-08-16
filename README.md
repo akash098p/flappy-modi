@@ -89,8 +89,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 | Night | 20 Coins | Dark atmosphere with purple accents |
 | Desert | 30 Coins | Warm orange sunset vibes |
 | Ocean | 40 Coins | Cool blue underwater theme |
-| Diwali | 50 Coins |  |
-| Independence Day | 60 Coins | |
+| Diwali | 50 Coins | Festive night sky with colorful fireworks |
+| Independence Day | 60 Coins | Patriotic tricolor sky with Indian flag accents |
 
 ---
 
@@ -100,8 +100,8 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 |---------|------|-------------|
 | Wing | Free | Classic flappy bird style |
 | Helicopter | 15 Coins | Rotor-based flying machine |
-| Car | 30 Coins |  |
-| Scooty | 45 Coins |  | 
+| Car | 30 Coins | Compact road vehicle adapted for flying |
+| Scooty | 45 Coins | Stylish Indian scooter turned flying vehicle |
 | Tejas | 60 Coins | Advanced jet aircraft |
 
 ---
