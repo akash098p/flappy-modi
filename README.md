@@ -35,7 +35,7 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
   <table width="100%">
   <tr>
     <td align="center" valign="middle" width="240" bgcolor="#525252">
-      <a href="https://akash098p.itch.io/route-master">
+      <a href="https://akash098p.itch.io/flappy-modi">
         <img src="https://github.com/user-attachments/assets/e4e1d70e-75d9-4d6a-b2e1-c60845ec2aa5" width="220" alt="Flappy Modi Cover">
       </a>
     </td>
