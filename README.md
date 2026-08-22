@@ -36,18 +36,18 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
   <tr>
     <td align="center" valign="middle" width="240" bgcolor="#525252">
       <a href="https://akash098p.itch.io/route-master">
-        <img src="https://github.com/user-attachments/assets/e4e1d70e-75d9-4d6a-b2e1-c60845ec2aa5" width="220" alt="Route Master Cover">
+        <img src="https://github.com/user-attachments/assets/e4e1d70e-75d9-4d6a-b2e1-c60845ec2aa5" width="220" alt="Flappy Modi Cover">
       </a>
     </td>
     <td valign="middle" bgcolor="#525252">
       <h3 align="left">
-        <a href="https://akash098p.itch.io/route-master">Route Master</a>
+        <a href="https://akash098p.itch.io/flappy-modi">Flappy Modi</a>
       </h3>
       <p align="left">
         A game by <a href="https://akash098p.itch.io">Akash Pramanik</a>
       </p>
       <p align="left">
-        <a href="https://akash098p.itch.io/route-master">
+        <a href="https://akash098p.itch.io/flappy-modi">
           <img src="https://img.shields.io/badge/Play_on-itch.io-ff0b0b?style=for-the-badge&logo=itch.io&logoColor=white" alt="Play on itch.io">
         </a>
       </p>
