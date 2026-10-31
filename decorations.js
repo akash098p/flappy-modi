@@ -775,7 +775,7 @@ window.drawDiwaliDecor = function(x, y, s, sway) {
   ctx.translate(x, y);
   ctx.scale(s, s);
   ctx.shadowColor = "rgba(255, 139, 34, 0.85)";
-  ctx.shadowBlur = 16;
+  ctx.shadowBlur = 6;
   const bowl = ctx.createLinearGradient(0, -5, 0, 9);
   bowl.addColorStop(0, "#ffcb68");
   bowl.addColorStop(0.35, "#e87832");
@@ -793,7 +793,7 @@ window.drawDiwaliDecor = function(x, y, s, sway) {
   ctx.ellipse(0, -1, 15, 3, 0, 0, Math.PI);
   ctx.stroke();
   ctx.shadowColor = "rgba(255, 189, 48, 0.95)";
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = 8;
   ctx.fillStyle = "#ff7138";
   ctx.beginPath();
   ctx.moveTo(0, -4 + flicker);
@@ -842,7 +842,7 @@ window.drawDiwaliGarland = function(x, y, s) {
     ctx.stroke();
     ctx.fillStyle = colors[i % colors.length];
     ctx.shadowColor = colors[i % colors.length];
-    ctx.shadowBlur = 12 * s;
+    ctx.shadowBlur = 4 * s;
     ctx.beginPath();
     ctx.arc(lightX, lightY + 7 * s, 3.2 * s, 0, Math.PI * 2);
     ctx.fill();
@@ -855,7 +855,7 @@ window.drawDiwaliRangoli = function(x, y, s) {
   ctx.translate(x, y);
   ctx.scale(s, s);
   ctx.shadowColor = "rgba(255, 196, 86, 0.5)";
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 3;
   ctx.strokeStyle = "rgba(255, 227, 167, 0.8)";
   ctx.lineWidth = 1.2;
   ctx.beginPath();
@@ -900,7 +900,7 @@ window.drawDiwaliFirework = function(firework) {
   ctx.strokeStyle = firework.color;
   ctx.fillStyle = firework.color;
   ctx.shadowColor = firework.color;
-  ctx.shadowBlur = 9;
+  ctx.shadowBlur = 3;
 
   for (let i = 0; i < rays; i++) {
     const angle = baseAngle + i * Math.PI * 2 / rays;
