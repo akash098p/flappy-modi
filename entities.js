@@ -77,6 +77,51 @@ window.spawnCoinBurst = function() {
   }
 }
 
+function drawCachedPipeSegment(pipe, drawSegment, theme, x, y, w, h, c1, c2, isTop) {
+  const cacheKey = [theme, w, window.H, window.groundH, window.DPR, c1, c2].join("|");
+  if (!pipe.renderCache || pipe.renderCache.key !== cacheKey) {
+    pipe.renderCache = { key: cacheKey, top: null, bottom: null };
+  }
+
+  const side = isTop ? "top" : "bottom";
+  let sprite = pipe.renderCache[side];
+  if (!sprite || sprite.height !== h) {
+    const paddingX = 12;
+    const paddingY = 10;
+    const scale = window.DPR || 1;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil((w + paddingX * 2) * scale);
+    canvas.height = Math.ceil((h + paddingY * 2) * scale);
+    const spriteCtx = canvas.getContext("2d");
+    spriteCtx.setTransform(scale, 0, 0, scale, 0, 0);
+
+    const gameCtx = window.ctx;
+    try {
+      window.ctx = spriteCtx;
+      drawSegment(paddingX, paddingY, w, h, c1, c2, isTop);
+    } finally {
+      window.ctx = gameCtx;
+    }
+
+    sprite = pipe.renderCache[side] = {
+      canvas,
+      height: h,
+      paddingX,
+      paddingY,
+      width: w + paddingX * 2,
+      spriteHeight: h + paddingY * 2,
+    };
+  }
+
+  window.ctx.drawImage(
+    sprite.canvas,
+    x - sprite.paddingX,
+    y - sprite.paddingY,
+    sprite.width,
+    sprite.spriteHeight
+  );
+}
+
 // Drawing functions for entities (global)
 window.drawPipes = function() {
   const theme = window.app.getAttribute("data-theme");
@@ -101,8 +146,8 @@ window.drawPipes = function() {
               : isNight
                 ? drawNightPipeSegment
                 : drawPipeSegment;
-    drawSegment(p.x, 0, PIPE_WIDTH, p.gapTop, c1, c2, true);
-    drawSegment(p.x, p.gapBottom, PIPE_WIDTH, (H - groundH) - p.gapBottom, c1, c2, false);
+    drawCachedPipeSegment(p, drawSegment, theme, p.x, 0, PIPE_WIDTH, p.gapTop, c1, c2, true);
+    drawCachedPipeSegment(p, drawSegment, theme, p.x, p.gapBottom, PIPE_WIDTH, (H - groundH) - p.gapBottom, c1, c2, false);
   });
 }
 
