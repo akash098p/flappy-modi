@@ -477,7 +477,7 @@ window.gameoverJustEnded = function() { return true; }
 // Canvas setup (global)
 window.W = 0; window.H = 0; window.DPR = 1; window.groundH = 0;
 window.resizeCanvas = function() {
-  const maxDpr = window.app && window.app.getAttribute("data-theme") === "diwali" ? 1.5 : 2.5;
+  const maxDpr = window.app && window.app.getAttribute("data-theme") === "diwali" ? 1.25 : 2.5;
   window.DPR = Math.min(window.devicePixelRatio || 1, maxDpr);
   window.W = window.innerWidth; window.H = window.innerHeight;
   window.canvas.width = Math.floor(window.W * window.DPR);
