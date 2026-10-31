@@ -249,6 +249,10 @@ window.update = function(dt) {
     p.x -= speed * dt;
     if (!p.passed && p.x + window.PIPE_WIDTH < window.bird.x) {
       p.passed = true; window.score++; window.hudScoreEl.textContent = window.score; window.spawnCoinBurst();
+      if (window.score > 0 && window.score % 50 === 0) {
+        window.playSound(window.audioWahModijiWah);
+        window.spawnCoinBurst();
+      }
     }
     if (p.x < -window.PIPE_WIDTH - 10) window.pipes.splice(i, 1);
     if (window.circleRectCollision(window.bird, { x: p.x, y: 0, w: window.PIPE_WIDTH, h: p.gapTop }) ||
@@ -329,22 +333,41 @@ window.endGame = function(cause) {
   } else {
     window.playSound(window.audioGameover);
   }
-  const earned = Math.max(0, Math.floor(window.score * window.COINS_PER_POINT));
+
+  if (window.state !== "gameover") {
+    window.state = "respawning";
+    window.showRespawnOverlay();
+  } else {
+    window.finalizeGameOver();
+  }
+}
+
+// Calculate total coins (base + milestone bonus) (global)
+window.calculateCoins = function(score) {
+  const baseCoins = Math.max(0, Math.floor(score * window.COINS_PER_POINT));
+  let bonusCoins = 0;
+  const milestones = Math.floor(score / 50);
+  for (let i = 1; i <= milestones; i++) {
+    const milestoneBonus = Math.min(i * 10, 100);
+    bonusCoins += milestoneBonus;
+  }
+  return baseCoins + bonusCoins;
+};
+
+window.finalizeGameOver = function() {
+  const earned = window.calculateCoins(window.score);
   window.save.coins += earned;
   if (window.score > window.save.bestScore) window.save.bestScore = window.score;
   window.saveGameState();
+  window.updateHud();
 
   window.goScoreEl.textContent = window.score;
   window.goBestEl.textContent = window.save.bestScore;
   window.goCoinsEl.textContent = earned;
   window.goMelodiesEl.textContent = window.melodiesThisRun;
 
-  if (window.state !== "gameover") {
-    window.state = "respawning";
-    window.showRespawnOverlay();
-  } else {
-    window.gameoverOverlay.classList.remove("hidden");
-  }
+  window.state = "gameover";
+  window.gameoverOverlay.classList.remove("hidden");
 }
 
 // Respawn (global)
@@ -393,8 +416,7 @@ window.startRespawnTimer = function() {
     if (window.respawnTimeLeft <= 0) {
       window.clearRespawnTimer();
       window.respawnOverlay.classList.add("hidden");
-      window.state = "gameover";
-      window.gameoverOverlay.classList.remove("hidden");
+      window.finalizeGameOver();
     }
   }, 1000);
 }
@@ -631,8 +653,7 @@ window.init = async function() {
     window.playTap(); window.clearRespawnTimer();
     window.playSound(window.audioGiveUp);
     window.respawnOverlay.classList.add("hidden");
-    window.state = "gameover";
-    window.gameoverOverlay.classList.remove("hidden");
+    window.finalizeGameOver();
   });
 
   // Menu buttons
@@ -743,15 +764,38 @@ window.init = async function() {
   window.renderPickers();
 }
 
+window.introFinished = false;
+window.skipBtnTimer = null;
+window.introTimer = null;
+
 // Intro video helpers (global)
 window.finishIntro = function() {
+  if (window.introFinished) return;
+  window.introFinished = true;
+
+  if (window.skipBtnTimer) {
+    clearTimeout(window.skipBtnTimer);
+    window.skipBtnTimer = null;
+  }
+  if (window.introTimer) {
+    clearTimeout(window.introTimer);
+    window.introTimer = null;
+  }
+
   const loadingScreen = document.getElementById("loading-screen");
   const introVideo = document.getElementById("intro-video");
+  const skipBtn = document.getElementById("skip-intro-btn");
   const homeScreen = document.getElementById("home-screen");
   
   if (introVideo) {
+    introVideo.onended = null;
     introVideo.pause();
     introVideo.currentTime = 0;
+    introVideo.classList.add("hidden");
+  }
+
+  if (skipBtn) {
+    skipBtn.classList.add("hidden");
   }
   
   if (loadingScreen) {
@@ -821,7 +865,11 @@ async function startGame() {
         introVideo.volume = 0.8;
         introVideo.currentTime = 0;
         introVideo.play().catch(() => {});
-        
+
+        introVideo.onended = () => {
+          window.finishIntro();
+        };
+
         // Hide the Tap to Start overlay
         if (tapToStartOverlay) tapToStartOverlay.classList.add("hidden");
         
@@ -834,14 +882,14 @@ async function startGame() {
         }
         
         // Show skip button after 4 seconds
-        setTimeout(() => {
-          if (skipBtn && !loadingScreen?.classList.contains("hidden")) {
+        window.skipBtnTimer = setTimeout(() => {
+          if (skipBtn && !window.introFinished) {
             skipBtn.classList.remove("hidden");
           }
         }, 4000);
         
         // Auto-finish intro after 10 seconds
-        setTimeout(() => {
+        window.introTimer = setTimeout(() => {
           window.finishIntro();
         }, 10000);
       };
