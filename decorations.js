@@ -5,6 +5,7 @@
 // Theme decoration management (global)
 window.themeDecorations = [];
 window.decorTime = 0;
+window.diwaliStaticLayer = null;
 
 // Theme preview class mapping for CSS-drawn previews
 window.getThemePreviewClass = function(themeId) {
@@ -46,6 +47,7 @@ window.renderThemeScene = function(container, themeId) {
 window.buildThemeDecorations = function() {
   const theme = app.getAttribute("data-theme");
   window.themeDecorations = [];
+  window.diwaliStaticLayer = null;
   
   if (theme === "day") {
     window.themeDecorations.push({ type: "sun", x: W * 0.8, y: H * 0.15, s: 1.2 });
@@ -165,14 +167,9 @@ window.buildThemeDecorations = function() {
         type: "diya", x, y: H * 0.16,
         s: 1.15, sway: Math.random() * Math.PI * 2, anchored: true
       });
-      window.themeDecorations.push({
-        type: "diya", x, y: diyaBaseY,
-        s: 1.15, sway: Math.random() * Math.PI * 2, anchored: true
-      });
     }
     window.themeDecorations.push(
-      { type: "diwaliRangoli", x: W * 0.1, y: diyaBaseY - 7, s: 1.25 },
-      { type: "diwaliRangoli", x: W * 0.9, y: diyaBaseY - 7, s: 1.25 }
+      { type: "diwaliRangoli", x: W * 0.5, y: H - (window.groundH || H * 0.12) + 8, s: 2.2 }
     );
     const fireworkColors = ["#ffd166", "#ff6b8a", "#75e6da", "#c5a3ff"];
     for (let i = 0; i < 4; i++) {
@@ -218,12 +215,40 @@ window.buildThemeDecorations = function() {
       });
     }
   }
+
+  if (theme === "diwali") window.cacheDiwaliStaticLayer();
+}
+
+window.cacheDiwaliStaticLayer = function() {
+  const scale = window.DPR || 1;
+  const layer = document.createElement("canvas");
+  layer.width = Math.ceil(W * scale);
+  layer.height = Math.ceil(H * scale);
+  const layerCtx = layer.getContext("2d");
+  layerCtx.setTransform(scale, 0, 0, scale, 0, 0);
+
+  const gameCtx = window.ctx;
+  try {
+    window.ctx = layerCtx;
+    window.themeDecorations.forEach(d => {
+      if (d.type === "diwaliGarland") window.drawDiwaliGarland(d.x, d.y, d.s);
+      else if (d.type === "diwaliRangoli") window.drawDiwaliRangoli(d.x, d.y, d.s);
+      else if (d.type === "diya") window.drawDiwaliDecorBase(d.x, d.y, d.s);
+    });
+  } finally {
+    window.ctx = gameCtx;
+  }
+
+  window.diwaliStaticLayer = layer;
 }
 
 window.updateAndDrawDecorations = function(dt) {
   window.decorTime += dt;
   ctx.save();
   ctx.globalAlpha = 0.9;
+  if (window.diwaliStaticLayer) {
+    ctx.drawImage(window.diwaliStaticLayer, 0, 0, W, H);
+  }
   
   window.themeDecorations.forEach(d => {
     if (d.type === "cloud" || d.type === "bird" || d.type === "owl" || d.type === "bat") {
@@ -286,9 +311,9 @@ window.updateAndDrawDecorations = function(dt) {
       case "seaweed": window.drawSeaweed(d.x, d.y, d.s, d.sway); break;
       case "bubble": window.drawBubble(d.x, d.y, d.s); break;
       case "jellyfish": window.drawJellyfish(d.x, d.y, d.s, d.sway); break;
-      case "diya": window.drawDiwaliDecor(d.x, d.y, d.s, d.sway); break;
-      case "diwaliGarland": window.drawDiwaliGarland(d.x, d.y, d.s); break;
-      case "diwaliRangoli": window.drawDiwaliRangoli(d.x, d.y, d.s); break;
+      case "diya": window.drawDiwaliFlame(d.x, d.y, d.s, d.sway); break;
+      case "diwaliGarland":
+      case "diwaliRangoli": break;
       case "diwaliFirework": window.drawDiwaliFirework(d); break;
       case "flag":
         ctx.save();
@@ -768,14 +793,10 @@ window.drawBubble = function(x, y, s) {
   ctx.fill();
 }
 
-window.drawDiwaliDecor = function(x, y, s, sway) {
-  const flicker = Math.sin(sway || 0) * 1.5;
-  const flameHeight = 9 + flicker;
+window.drawDiwaliDecorBase = function(x, y, s) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(s, s);
-  ctx.shadowColor = "rgba(255, 139, 34, 0.85)";
-  ctx.shadowBlur = 6;
   const bowl = ctx.createLinearGradient(0, -5, 0, 9);
   bowl.addColorStop(0, "#ffcb68");
   bowl.addColorStop(0.35, "#e87832");
@@ -792,8 +813,17 @@ window.drawDiwaliDecor = function(x, y, s, sway) {
   ctx.beginPath();
   ctx.ellipse(0, -1, 15, 3, 0, 0, Math.PI);
   ctx.stroke();
+  ctx.restore();
+}
+
+window.drawDiwaliFlame = function(x, y, s, sway) {
+  const flicker = Math.sin(sway || 0) * 1.5;
+  const flameHeight = 9 + flicker;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
   ctx.shadowColor = "rgba(255, 189, 48, 0.95)";
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 4;
   ctx.fillStyle = "#ff7138";
   ctx.beginPath();
   ctx.moveTo(0, -4 + flicker);
@@ -808,6 +838,11 @@ window.drawDiwaliDecor = function(x, y, s, sway) {
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.restore();
+}
+
+window.drawDiwaliDecor = function(x, y, s, sway) {
+  window.drawDiwaliDecorBase(x, y, s);
+  window.drawDiwaliFlame(x, y, s, sway);
 }
 
 window.drawDiwaliGarland = function(x, y, s) {
