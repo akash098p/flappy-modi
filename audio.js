@@ -19,6 +19,7 @@ window.audioAnimation = document.getElementById("audio-animation");
 window.audioRewards = document.getElementById("audio-rewards");
 window.audioWhaKyaSceneHai = document.getElementById("audio-wha-kya-scene-hai");
 window.audioGiveUp = document.getElementById("audio-give-up");
+window.audioWahModijiWah = document.getElementById("audio-wah-modiji-wah");
 
 // Volume settings
 window.audioBgm.volume = 0.88;
@@ -28,6 +29,7 @@ window.audioStart.volume = 0.8;
 window.audioMelody.volume = 0.9;
 window.audioFahhh.volume = 0.9;
 window.audioHomeBg.volume = 0.9;
+window.audioWahModijiWah.volume = 0.9;
 window.audioTap.volume = 0.7;
 window.audioPurchase.volume = 0.8;
 window.audioPreview.volume = 0.5;
@@ -49,7 +51,11 @@ window.playSound = function(el) {
 window.playTap = function() { window.playSound(window.audioTap); }
 window.playPurchase = function() { window.playSound(window.audioPurchase); }
 
+window.introAudioPlayed = false;
 window.playIntroAudioSequence = function() {
+  if (window.introAudioPlayed) return;
+  window.introAudioPlayed = true;
+
   try {
     window.audioHomeBg.pause();
     window.audioHomeBg.currentTime = 0;

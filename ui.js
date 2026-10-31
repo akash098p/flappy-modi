@@ -21,10 +21,11 @@ window.renderPickers = function() {
     const card = document.createElement("div");
     card.className = "pick-card" + (owned ? " owned" : "") + (selected ? " selected" : "");
     const previewClass = window.getThemePreviewClass(t.id);
+    const previewObjects = window.getThemePreviewObjects(t.id);
     card.innerHTML = `
       <div class="lock-badge">🔒</div>
-      <div class="pick-thumb theme-swatch ${previewClass}" style="background:${t.swatch}">
-        <div class="decorations"></div>
+      <div class="pick-thumb theme-swatch ${previewClass}">
+        <div class="scene-art" aria-hidden="true">${previewObjects.map(object => `<span class="scene-object ${object}"></span>`).join("")}</div>
       </div>
       <div class="pick-name">${t.name}</div>
       ${owned ? "" : `<div class="pick-cost"><span class="coin-dot"></span>${t.cost}</div>`}
@@ -183,6 +184,10 @@ window.flashInsufficientCoins = function() {
 
 window.applyTheme = function(themeId) {
   app.setAttribute("data-theme", themeId);
+  window.renderThemeScene(
+    document.getElementById("tap-to-start-scene"),
+    themeId
+  );
 }
 
 // Screen navigation (global)
