@@ -271,4 +271,4 @@ This project is open source and available for educational purposes.
 
 ---
 
-**Note**: This is a fan-made game inspired by Flappy Bird. The main playable character and vehicle designs are original game assets created for this project. All music and sound effects are used for gameplay and local demo purposes.
+**Note**: This is a fan-made game inspired by Flappy Bird. The main playable character, vehicles, musics and sound effects are used for entertainment purposes only.
