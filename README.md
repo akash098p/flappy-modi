@@ -15,16 +15,14 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/65967fd7-6f50-4635-91f8-e84da71ec0f2" width="37.4%">
-  <img src="https://github.com/user-attachments/assets/6a6e85dc-763d-4f28-89e7-266fd7cfef56" width="58.6%">
+  <img src="https://github.com/user-attachments/assets/93b3a8eb-3b28-4368-9550-e624b4e19f88" width="49.5%">
+  <img src="https://github.com/user-attachments/assets/fa14063d-8593-4a6c-826e-c22664a6c1cf" width="48.5%">
 <br>
-  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="50.7%">
-  <img src="https://github.com/user-attachments/assets/da410a14-c0fc-4c2b-8904-a81ee2b07993" width="45.3%">
-
+  <img src="https://github.com/user-attachments/assets/b1328831-5a73-45c8-9565-4e71f5095739" width="48.5%">
+  <img src="https://github.com/user-attachments/assets/35d39a2a-de10-4d43-8c3e-22fe99fb9baf" width="49.5%">
 <br>
-  <img src="https://github.com/user-attachments/assets/d609c5ab-32f4-4082-b4e7-57b90a809c9d" width="38.8%">
-  <img src="https://github.com/user-attachments/assets/aee60940-084a-47b4-8c2f-ea65708d5774" width="57.2%">
-
+  <img src="https://github.com/user-attachments/assets/89ef817f-d6b4-4b23-b89d-8b6504fc8aac" width="52.1%">
+  <img src="https://github.com/user-attachments/assets/e8e9d48d-5741-42d5-926a-7ec298d1e369" width="45.9%">
 </p>
 
 ---
