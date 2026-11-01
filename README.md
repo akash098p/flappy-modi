@@ -1,6 +1,6 @@
 # Flappy Modi
 
-A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and music. Built with vanilla JavaScript and HTML5 Canvas for smooth mobile gameplay.
+A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, with custom vehicles, unlockable themes, background soundtracks, a shield protection system, and persistent local progression. Built with vanilla JavaScript and HTML5 Canvas for smooth browser gameplay.
 
 <p align="center">
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
@@ -15,16 +15,14 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/65967fd7-6f50-4635-91f8-e84da71ec0f2" width="37.4%">
-  <img src="https://github.com/user-attachments/assets/6a6e85dc-763d-4f28-89e7-266fd7cfef56" width="58.6%">
+  <img src="https://github.com/user-attachments/assets/93b3a8eb-3b28-4368-9550-e624b4e19f88" width="49.5%">
+  <img src="https://github.com/user-attachments/assets/fa14063d-8593-4a6c-826e-c22664a6c1cf" width="48.5%">
 <br>
-  <img src="https://github.com/user-attachments/assets/3699e764-9135-4fc5-9640-8c072b551542" width="50.7%">
-  <img src="https://github.com/user-attachments/assets/da410a14-c0fc-4c2b-8904-a81ee2b07993" width="45.3%">
-
+  <img src="https://github.com/user-attachments/assets/b1328831-5a73-45c8-9565-4e71f5095739" width="48.5%">
+  <img src="https://github.com/user-attachments/assets/35d39a2a-de10-4d43-8c3e-22fe99fb9baf" width="49.5%">
 <br>
-  <img src="https://github.com/user-attachments/assets/d609c5ab-32f4-4082-b4e7-57b90a809c9d" width="38.8%">
-  <img src="https://github.com/user-attachments/assets/aee60940-084a-47b4-8c2f-ea65708d5774" width="57.2%">
-
+  <img src="https://github.com/user-attachments/assets/89ef817f-d6b4-4b23-b89d-8b6504fc8aac" width="52.1%">
+  <img src="https://github.com/user-attachments/assets/e8e9d48d-5741-42d5-926a-7ec298d1e369" width="45.9%">
 </p>
 
 ---
@@ -59,50 +57,51 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 
 ## 🎮 Features
 
-- **5 Unique Themes**: Day, Night, Desert, Ocean, and Festival themes with dynamic backgrounds
-- **3 Vehicles**: Choose from Wing, Helicopter, and Tejas aircraft
-- **5 Soundtracks**: Popular Indian songs as background music
-- **Melody Collection**: Collect rare melodies during gameplay
-- **Hit System**: Protect yourself from cockroach collisions
-- **Melody Pack Roulette**: Spin to win melodies and coins
-- **Responsive Design**: Optimized for mobile devices with touch controls
-- **Persistent Progress**: Local storage saves your coins, melodies, and unlocks
+- **Custom Vehicles**: Unlock and switch between different flying vehicles with unique styles and progression-based upgrades
+- **Unlockable Themes**: Explore multiple visual themes including Day, Night, Desert, Ocean, and festive variations
+- **Background Soundtracks**: Enjoy a curated playlist of Indian-inspired tracks while you play
+- **Shield Protection System**: Buy and use a shield to protect yourself from a collision and stay in the run
+- **Melody Collection**: Gather rare melodies and bonus items during gameplay for extra rewards
+- **Roulette Rewards**: Spin for coin and melody prizes with the in-game reward system
+- **Responsive Mobile Design**: Built for touch-friendly gameplay on phones, tablets, and desktop browsers
+- **Persistent Progression**: Local storage saves coins, melodies, unlocked content, and long-term progression across sessions
 
 ---
 
 ## 🎯 Gameplay
 
 - **Tap or Press Space** to flap and navigate through pipes
-- **Avoid pipes and cockroaches** to keep flying
-- **Collect melodies** (diamond icons) for bonus points
-- **Earn coins** based on your score
-- **Buy hits** in the store to protect from cockroaches
-- **Purchase melody packs** to spin the roulette and win prizes
+- **Avoid pipes and cockroaches** while using your movement skills to survive longer
+- **Collect melodies** to gain bonus rewards and power up your progression
+- **Earn coins** based on your score and successful runs
+- **Use shield protection** strategically to avoid losing the run after a collision
+- **Unlock vehicles and themes** using the in-game economy and save system
+- **Choose your soundtrack** and personalize the experience while you play
 
 ---
 
 ## 🎨 Themes
 
 | Theme | Cost | Description |
-|-------|------|-------------|
-| Day | Free | Classic bright sky with blue pipes |
-| Night | 20 Coins | Dark atmosphere with purple accents |
-| Desert | 30 Coins | Warm orange sunset vibes |
-| Ocean | 40 Coins | Cool blue underwater theme |
-| Diwali | 50 Coins | Festive night sky with colorful fireworks |
-| Independence Day | 60 Coins | Patriotic tricolor sky with Indian flag accents |
+| |-------|------|-------------|
+| | Day | Free | Classic bright sky with blue pipes |
+| | Night | 20 Coins | Dark atmosphere with purple accents |
+| | Desert | 30 Coins | Warm orange sunset vibes |
+| | Ocean | 40 Coins | Cool blue underwater theme |
+| | Diwali | 50 Coins | Festive night sky with colorful fireworks |
+| | Independence Day | 60 Coins | Patriotic tricolor sky with Indian flag accents |
 
 ---
 
 ## ✈️ Vehicles
 
 | Vehicle | Cost | Description |
-|---------|------|-------------|
-| Wing | Free | Classic flappy bird style |
-| Helicopter | 15 Coins | Rotor-based flying machine |
-| Car | 30 Coins | Compact road vehicle adapted for flying |
-| Scooty | 45 Coins | Stylish Indian scooter turned flying vehicle |
-| Tejas | 60 Coins | Advanced jet aircraft |
+| |---------|------|-------------|
+| | Wing | Free | Classic flappy bird style |
+| | Helicopter | 15 Coins | Rotor-based flying machine |
+| | Car | 30 Coins | Compact road vehicle adapted for flying |
+| | Scooty | 45 Coins | Stylish Indian scooter turned flying vehicle |
+| | Tejas | 60 Coins | Advanced jet aircraft |
 
 ---
 
@@ -116,13 +115,14 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 - Gehra Hua
 - Pagli Dekhawa Agarbatti
 - Naam Chale
-- Heroine 
+- Heroine
 
 ---
 
 ## 🛒 Store Items
 
 - **1 Hit** - 5 Coins: Protects from one cockroach collision
+- **Shield Upgrade** - Game protection item for safer runs
 - **Melody Pack** - 50 Coins: Spin the roulette to win 2-15 melodies or 20 coins
 
 ---
@@ -130,13 +130,13 @@ A modern, arcade-style Flappy Bird clone featuring Indian themes, vehicles, and 
 ## 🎰 Roulette Prizes
 
 | Prize | Chance |
-|-------|--------|
-| 2 Melodies | 34% |
-| 4 Melodies | 19% |
-| 5 Melodies | 14% |
-| 20 Coins | 20% |
-| 10 Melodies | 8% |
-| 15 Melodies | 5% |
+| |-------|--------|
+| | 2 Melodies | 34% |
+| | 4 Melodies | 19% |
+| | 5 Melodies | 14% |
+| | 20 Coins | 20% |
+| | 10 Melodies | 8% |
+| | 15 Melodies | 5% |
 
 ---
 
@@ -269,4 +269,4 @@ This project is open source and available for educational purposes.
 
 ---
 
-**Note**: This is a fan-made game inspired by Flappy Bird. The main playable character and vehicle designs are original game assets created for this project. All music and sound effects are used for entertainment purposes only.
+**Note**: This is a fan-made game inspired by Flappy Bird. The main playable character, vehicles, musics and sound effects are used for entertainment purposes only.

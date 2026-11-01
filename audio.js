@@ -40,11 +40,52 @@ window.audioRewards.volume = 0.8;
 window.audioWhaKyaSceneHai.volume = 0.9;
 window.audioGiveUp.volume = 0.8;
 
+window.activeDuckingCount = 0;
+const DUCKED_BGM_VOLUME = 0.20;
+const NORMAL_BGM_VOLUME = 0.88;
+
 // Play sound helper (global)
 window.playSound = function(el) {
   try {
+    if (!el) return;
     el.currentTime = 0;
     el.play().catch(() => {});
+
+    // Audio Ducking: Lower BGM volume when key in-game sound effects play
+    if (
+      el === window.audioWahModijiWah ||
+      el === window.audioWhaKyaSceneHai ||
+      el === window.audioOoh ||
+      el === window.audioMelody
+    ) {
+      if (el._duckCleanup) {
+        el._duckCleanup();
+      }
+
+      window.activeDuckingCount++;
+      window.audioBgm.volume = DUCKED_BGM_VOLUME;
+
+      const restoreVolume = () => {
+        if (el._duckCleanup) {
+          el.removeEventListener("ended", el._duckCleanup);
+          if (el._duckTimeout) {
+            clearTimeout(el._duckTimeout);
+            el._duckTimeout = null;
+          }
+          el._duckCleanup = null;
+          window.activeDuckingCount = Math.max(0, window.activeDuckingCount - 1);
+          if (window.activeDuckingCount === 0) {
+            window.audioBgm.volume = NORMAL_BGM_VOLUME;
+          }
+        }
+      };
+
+      el._duckCleanup = restoreVolume;
+      el.addEventListener("ended", restoreVolume, { once: true });
+
+      const durationMs = (el.duration && !isNaN(el.duration) && el.duration > 0) ? (el.duration * 1000 + 200) : 3500;
+      el._duckTimeout = setTimeout(restoreVolume, durationMs);
+    }
   } catch (e) { /* ignore */ }
 }
 
