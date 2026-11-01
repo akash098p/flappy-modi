@@ -80,28 +80,32 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 
 ---
 
+
 ## 🎨 Themes
 
 | Theme | Cost | Description |
-| |-------|------|-------------|
-| | Day | Free | Classic bright sky with blue pipes |
-| | Night | 20 Coins | Dark atmosphere with purple accents |
-| | Desert | 30 Coins | Warm orange sunset vibes |
-| | Ocean | 40 Coins | Cool blue underwater theme |
-| | Diwali | 50 Coins | Festive night sky with colorful fireworks |
-| | Independence Day | 60 Coins | Patriotic tricolor sky with Indian flag accents |
+|-------|------|-------------|
+| ☀️ Day | Free | Classic bright sky with blue pipes |
+| 🌙 Night | 20 Coins | Dark atmosphere with purple accents |
+| 🏜️ Desert | 30 Coins | Warm orange sunset vibes |
+| 🌊 Ocean | 40 Coins | Cool blue underwater theme |
+| 🪔 Diwali | 50 Coins | Festive night sky with colorful fireworks |
+| 🇮🇳 Independence Day | 60 Coins | Patriotic tricolor sky with Indian flag accents |
+
 
 ---
+
 
 ## ✈️ Vehicles
 
 | Vehicle | Cost | Description |
-| |---------|------|-------------|
-| | Wing | Free | Classic flappy bird style |
-| | Helicopter | 15 Coins | Rotor-based flying machine |
-| | Car | 30 Coins | Compact road vehicle adapted for flying |
-| | Scooty | 45 Coins | Stylish Indian scooter turned flying vehicle |
-| | Tejas | 60 Coins | Advanced jet aircraft |
+|---------|------|-------------|
+| 🪽 Wing | Free | Classic Flappy Bird style |
+| 🚁 Helicopter | 15 Coins | Rotor-based flying machine |
+| 🚗 Car | 30 Coins | Compact road vehicle adapted for flying |
+| 🛵 Scooty | 45 Coins | Stylish Indian scooter turned flying vehicle |
+| ✈️ Tejas | 60 Coins | Advanced jet aircraft |
+
 
 ---
 
@@ -127,16 +131,18 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 
 ---
 
+
 ## 🎰 Roulette Prizes
 
 | Prize | Chance |
-| |-------|--------|
-| | 2 Melodies | 34% |
-| | 4 Melodies | 19% |
-| | 5 Melodies | 14% |
-| | 20 Coins | 20% |
-| | 10 Melodies | 8% |
-| | 15 Melodies | 5% |
+|-------|--------|
+| 🍬 2 Melodies | 34% |
+| 🍬 4 Melodies | 19% |
+| 🍬 5 Melodies | 14% |
+| 🪙 20 Coins | 20% |
+| 🍬 10 Melodies | 8% |
+| 🍬 15 Melodies | 5% |
+
 
 ---
 
