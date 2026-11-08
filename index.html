@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <link rel="icon" type="image/png" href="images/logo.png" />
 <title>Flappy Modi</title>
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css?v=20261108-home-settings" />
 </head>
 <body>
 
@@ -50,6 +50,23 @@
 
       <!-- MIDDLE: Stats & Play Button -->
       <div class="home-middle">
+        <div class="skill-counts-row" aria-label="Available skill charges">
+          <div class="skill-count-card">
+            <img src="images/system hack.png" alt="" />
+            <span>Systum</span>
+            <strong id="home-systum-charges">0</strong>
+          </div>
+          <div class="skill-count-card">
+            <img src="images/vande boost.png" alt="" />
+            <span>Vande</span>
+            <strong id="home-vande-charges">0</strong>
+          </div>
+          <div class="skill-count-card">
+            <img src="images/pappu hamza.png" alt="" />
+            <span>Pappu</span>
+            <strong id="home-pappu-charges">0</strong>
+          </div>
+        </div>
         <div class="stats-row">
           <div class="stat-card">
             <span class="stat-label">Best Score</span>
@@ -142,13 +159,14 @@
     <div class="overlay-card info-card">
       <h2>💡 How to Play</h2>
       <div class="info-list">
-        <div class="info-item"><span class="info-num">1</span><p><strong>Tap to Flap</strong> — Tap anywhere to make Modi fly. Don't stop tapping!</p></div>
-        <div class="info-item"><span class="info-num">2</span><p><strong>Avoid Obstacles</strong> — Dodge pipes, watch out for cockroaches 🪳.</p></div>
-        <div class="info-item"><span class="info-num">3</span><p><strong>Score Points</strong> — Pass through pipe gaps to earn score & coins. That's how you win!</p></div>
-        <div class="info-item"><span class="info-num">4</span><p><strong>Use Hits</strong> — Hits protect you once from a cockroach collision. Buy more in the Store.</p></div>
-        <div class="info-item"><span class="info-num">5</span><p><strong>Collect Melodies</strong> — Catch melodies mid-flight. They let you <em>respawn</em> after a crash.</p></div>
-        <div class="info-item"><span class="info-num">6</span><p><strong>Buy Melody Pack</strong> — Get melodies from the Store & spin the roulette for extra melodies.</p></div>
-        <div class="info-item"><span class="info-num">7</span><p><strong>Customize</strong> — Unlock new <em>Themes</em> 🎨 and <em>Vehicles</em> ✈️ with your coins!</p></div>
+        <div class="info-item"><span class="info-num">1</span><p><strong>Flap and steer</strong> — Tap/click or press <kbd>Space</kbd> to fly. Avoid pipes, cockroaches, and the ground.</p></div>
+        <div class="info-item"><span class="info-num">2</span><p><strong>Score and collect</strong> — Pass pipe gaps for points and coins; collect melodies to respawn after a crash. A hit can save you from one cockroach collision.</p></div>
+        <div class="info-item"><span class="info-num">3</span><p><strong>Systum Hack · press 1</strong> — Lasts 15 seconds. Protects from pipes and cockroaches and doubles or triples pipe and melody coin rewards. Flight remains manual.</p></div>
+        <div class="info-item"><span class="info-num">4</span><p><strong>Vande Boost · press 2</strong> — Lasts 10 seconds with 4×/3×/2× speed phases. Auto-floats for 6 seconds; tap or press <kbd>Space</kbd> to steer, then take manual control during the descent.</p></div>
+        <div class="info-item"><span class="info-num">5</span><p><strong>Pappu Hamza · press 3</strong> — Lasts 10 seconds and automatically shoots at pipes and cockroaches. Pipes fall away and cockroaches burn; the ground is still dangerous.</p></div>
+        <div class="info-item"><span class="info-num">6</span><p><strong>Get more skill charges</strong> — Buy Systum Hack, Vande Boost, and Pappu Hamza in the Store with melodies, or win them in Melody NAMO Edition.</p></div>
+        <div class="info-item"><span class="info-num">7</span><p><strong>Customize your run</strong> — Unlock themes and vehicles with coins, select game songs, and choose repeated or shuffled music in Settings.</p></div>
+        <div class="info-item"><span class="info-num">8</span><p><strong>Roulette rewards</strong> — Use Melody Pack or Melody NAMO Edition from the Store for melodies and skill-charge bundles.</p></div>
       </div>
       <p class="tips-disclaimer"><strong>Note</strong>: This is a fan-made parody game inspired by Flappy Bird. The main playable character, vehicles, musics and sound effects are used for entertainment purposes only.</p>
       <button id="tips-close-btn" class="btn-primary small">Got it!</button>
@@ -167,6 +185,13 @@
         <div class="settings-label">🎵 Music</div>
         <input type="range" id="bgm-volume" min="0" max="1" step="0.05" value="0.88" />
       </div>
+      <label class="settings-toggle-row" for="random-songs-toggle">
+        <span>
+          <span class="settings-label">🔀 Random song playlist</span>
+          <span class="settings-help">Shuffle all songs without repeats; off repeats your selected song.</span>
+        </span>
+        <input type="checkbox" id="random-songs-toggle" />
+      </label>
       <button id="settings-close-btn" class="btn-primary small">Close</button>
     </div>
   </div>
@@ -174,8 +199,8 @@
   <!-- ===================== ROULETTE OVERLAY ===================== -->
   <div id="roulette-overlay" class="overlay hidden">
     <div class="overlay-card roulette-card">
-      <h2>Melody Pack!</h2>
-      <p class="roulette-hint">Tap to spin and win melodies!</p>
+      <h2 id="roulette-title">Melody Pack!</h2>
+      <p id="roulette-hint" class="roulette-hint">Tap to spin and win melodies!</p>
       <div class="roulette-container">
         <div class="roulette-hand"></div>
         <div class="roulette-track-wrapper">
@@ -206,6 +231,17 @@
       <div id="hud-items">
         <span class="hud-item hit-value"><img class="hit-icon-sm" src="images/hit.png" alt="hit" /><span id="hud-hits">0</span></span>
         <span class="hud-item melody-value"><img class="melody-icon-sm" src="images/melody .png" alt="melody" /><span id="hud-melodies">0</span></span>
+      </div>
+      <div id="hud-skills">
+        <button id="systum-skill-btn" class="skill-btn" type="button" aria-label="Activate Systum Hack">
+          <img src="images/system hack.png" alt="" /><span id="systum-skill-status" class="skill-status">×0</span>
+        </button>
+        <button id="vande-skill-btn" class="skill-btn" type="button" aria-label="Activate Vande Boost">
+          <img src="images/vande boost.png" alt="" /><span id="vande-skill-status" class="skill-status">×0</span>
+        </button>
+        <button id="pappu-skill-btn" class="skill-btn" type="button" aria-label="Activate Pappu Hamza">
+          <img src="images/pappu hamza.png" alt="" /><span id="pappu-skill-status" class="skill-status">×0</span>
+        </button>
       </div>
       <button id="pause-btn" aria-label="Pause">II</button>
     </div>
@@ -278,7 +314,7 @@
 
 <!-- ===================== AUDIO ===================== -->
 <audio id="audio-jump" src="audio/jump.mp3" preload="auto"></audio>
-<audio id="audio-bgm" preload="auto" loop></audio>
+<audio id="audio-bgm" preload="auto"></audio>
 <audio id="audio-gameover" src="audio/gameover.mp3" preload="auto"></audio>
 <audio id="audio-start" src="audio/start.mp3" preload="auto"></audio>
 <audio id="audio-melody" src="audio/melody.mp3" preload="auto"></audio>
@@ -294,13 +330,18 @@
 <audio id="audio-wha-kya-scene-hai" src="audio/wha-kya-scene-hai.mp3" preload="auto"></audio>
 <audio id="audio-give-up" src="audio/give up.mp3" preload="auto"></audio>
 <audio id="audio-wah-modiji-wah" src="audio/wah-modiji-wah.mp3" preload="auto"></audio>
+<audio id="audio-pappu-burn" src="audio/aag.mp3" preload="auto"></audio>
+<audio id="audio-pappu-pipe-khatam" src="audio/khatam.mp3" preload="auto"></audio>
+<audio id="audio-pappu-pipe-tata" src="audio/tata.mp3" preload="auto"></audio>
+<audio id="audio-pappu-pipe-goodbye" src="audio/goodbye.mp3" preload="auto"></audio>
+<audio id="audio-pappu-pipe-gaya" src="audio/gaya.mp3" preload="auto"></audio>
 
   <!-- Load game modules in order -->
-  <script src="config.js"></script>
-  <script src="audio.js"></script>
-  <script src="entities.js?v=20261031-night-columns"></script>
+  <script src="config.js?v=20261108-pappu-parts"></script>
+  <script src="audio.js?v=20261108-pappu-pipe-pieces"></script>
+  <script src="entities.js?v=20261108-pappu-pipe-pieces"></script>
   <script src="decorations.js"></script>
-  <script src="ui.js"></script>
-  <script src="main.js"></script>
+  <script src="ui.js?v=20261108-home-settings"></script>
+  <script src="main.js?v=20261108-pappu-pipe-pieces"></script>
 </body>
 </html>
