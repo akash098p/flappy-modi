@@ -42,9 +42,9 @@ window.spinBtn = null; window.closeRouletteBtn = null;
 window.rouletteOverlay = null; window.rouletteTrack = null;
 window.respawnOverlay = null; window.gameoverOverlay = null; window.pauseOverlay = null; window.getReadyOverlay = null;
 window.hudScoreEl = null; window.hudHitsEl = null; window.hudMelodiesEl = null;
-window.systumSkillBtn = null; window.systumSkillStatusEl = null;
-window.vandeSkillBtn = null; window.vandeSkillStatusEl = null;
-window.pappuSkillBtn = null; window.pappuSkillStatusEl = null;
+window.systumSkillBtn = null; window.systumSkillTimerEl = null;
+window.vandeSkillBtn = null; window.vandeSkillTimerEl = null;
+window.pappuSkillBtn = null; window.pappuSkillTimerEl = null;
 window.goScoreEl = null; window.goBestEl = null; window.goCoinsEl = null; window.goMelodiesEl = null;
 window.respawnCostText = null;
 window.allScreens = null;
@@ -229,6 +229,7 @@ window.createPappuPipePieces = function(pipe) {
         vy: window.rand(-12, 72),
         rotation: 0,
         spin: window.rand(-1.5, 1.5),
+        grounded: false,
       });
     }
   });
@@ -240,13 +241,18 @@ window.updatePappuHamza = function(dt) {
     window.pappuFireCooldown -= dt;
     if (window.pappuFireCooldown <= 0 && window.bird) {
       const targets = [];
-      window.pipes.forEach(pipe => {
-        if (pipe.destruction || pipe.pappuTargeted || pipe.x + window.PIPE_WIDTH < window.bird.x) return;
+      const pipeAlreadyTargeted = window.pipes.some(pipe => pipe.pappuTargeted && !pipe.destruction);
+      const nextPipe = window.pipes
+        .filter(pipe => !pipe.destruction && !pipe.pappuTargeted && pipe.x + window.PIPE_WIDTH >= window.bird.x)
+        .sort((a, b) => a.x - b.x)[0];
+      if (!pipeAlreadyTargeted && nextPipe &&
+          nextPipe.x - window.bird.x <= window.GAME_CONFIG.PAPPU_HAMZA_PIPE_TARGET_DISTANCE) {
+        const pipe = nextPipe;
         const upperY = pipe.gapTop / 2;
         const lowerY = pipe.gapBottom + (window.H - window.groundH - pipe.gapBottom) / 2;
         const targetY = Math.abs(window.bird.y - upperY) <= Math.abs(window.bird.y - lowerY) ? upperY : lowerY;
         targets.push({ target: pipe, type: "pipe", x: pipe.x + window.PIPE_WIDTH / 2, y: targetY });
-      });
+      }
       window.cockroaches.forEach(cockroach => {
         if (cockroach.burning || cockroach.pappuTargeted || cockroach.x < window.bird.x - cockroach.size) return;
         targets.push({
@@ -305,6 +311,7 @@ window.updatePappuHamza = function(dt) {
     const travel = window.GAME_CONFIG.PAPPU_HAMZA_PROJECTILE_SPEED * dt;
     if (distance <= travel + (projectile.type === "pipe" ? window.PIPE_WIDTH * 0.35 : target.size * 0.35)) {
       if (projectile.type === "pipe") {
+        window.awardPipeScore(target);
         target.destruction = {
           elapsed: 0,
           pieces: window.createPappuPipePieces(target),
@@ -334,23 +341,20 @@ window.updatePappuHamza = function(dt) {
 }
 
 window.updateSkillButtons = function() {
-  if (!window.systumSkillBtn || !window.vandeSkillBtn || !window.pappuSkillBtn) return;
+  if (!window.systumSkillBtn || !window.vandeSkillBtn || !window.pappuSkillBtn ||
+      !window.systumSkillTimerEl || !window.vandeSkillTimerEl || !window.pappuSkillTimerEl) return;
   const charges = window.save.skillCharges || {};
   const systumActive = window.systumHackTimer > 0;
   const vandeActive = window.vandeBoostTimer > 0;
   const pappuActive = window.pappuHamzaTimer > 0;
-  const systumStatus = systumActive
-    ? `${Math.ceil(window.systumHackTimer)}s`
-    : `×${charges.systumHack || 0}`;
-  const vandeStatus = vandeActive
-    ? `${Math.ceil(window.vandeBoostTimer)}s`
-    : `×${charges.vandeBoost || 0}`;
-  const pappuStatus = pappuActive
-    ? `${Math.ceil(window.pappuHamzaTimer)}s`
-    : `×${charges.pappuHamza || 0}`;
-  if (window.systumSkillStatusEl.textContent !== systumStatus) window.systumSkillStatusEl.textContent = systumStatus;
-  if (window.vandeSkillStatusEl.textContent !== vandeStatus) window.vandeSkillStatusEl.textContent = vandeStatus;
-  if (window.pappuSkillStatusEl.textContent !== pappuStatus) window.pappuSkillStatusEl.textContent = pappuStatus;
+  const updateTimer = (button, timerElement, remaining) => {
+    const timerText = remaining > 0 ? `${Math.ceil(remaining)}s` : "";
+    if (timerElement.textContent !== timerText) timerElement.textContent = timerText;
+    button.classList.toggle("active", remaining > 0);
+  };
+  updateTimer(window.systumSkillBtn, window.systumSkillTimerEl, window.systumHackTimer);
+  updateTimer(window.vandeSkillBtn, window.vandeSkillTimerEl, window.vandeBoostTimer);
+  updateTimer(window.pappuSkillBtn, window.pappuSkillTimerEl, window.pappuHamzaTimer);
   const systumDisabled = window.state !== "playing" || (!systumActive && !(charges.systumHack > 0));
   const vandeDisabled = window.state !== "playing" || (!vandeActive && !(charges.vandeBoost > 0));
   const pappuDisabled = window.state !== "playing" || (!pappuActive && !(charges.pappuHamza > 0));
@@ -390,6 +394,7 @@ window.activateVandeBoost = function() {
 // Start new game (global)
 window.startNewGame = function() {
   const vehicleData = window.VEHICLES.find(v => v.id === window.save.selectedVehicle) || window.VEHICLES[0];
+  const isDesktop = window.W >= 900;
   
   window.currentVehicleImg = window.loadImage(vehicleData.img);
 
@@ -399,7 +404,9 @@ window.startNewGame = function() {
     vy: 0, 
     rotation: 0,
     shieldTimer: 0,
-    size: Math.max(50, Math.min(80, window.W * 0.14)),
+    size: isDesktop
+      ? Math.max(50, Math.min(64, window.W * 0.11))
+      : Math.max(50, Math.min(80, window.W * 0.14)),
   };
   window.pipes = []; window.cockroaches = []; window.melons = []; window.melodies = []; window.particles = [];
   window.score = 0; window.elapsed = 0; window.pipeTimer = 0;
@@ -433,6 +440,23 @@ window.startNewGame = function() {
 
 // Random number helper (global)
 window.rand = function(min, max) { return min + Math.random() * (max - min); }
+
+window.awardPipeScore = function(pipe) {
+  if (pipe.passed) return;
+  pipe.passed = true;
+  window.score++;
+  window.hudScoreEl.textContent = window.score;
+  window.spawnCoinBurst();
+  if (window.systumHackTimer > 0) {
+    window.systumBonusCoins += Math.floor(window.COINS_PER_POINT) * (window.systumHackMultiplier - 1);
+  }
+  if (window.vandeBoostTimer > 0 && window.vandePipesRemaining > 0) window.vandePipesRemaining--;
+  if (window.score > 0 && window.score % 50 === 0) {
+    window.playSound(window.audioWahModijiWah);
+    window.spawnCoinBurst();
+    window.spawnLotusRain();
+  }
+}
 
 // Input handling (global)
 window.isInteractiveTarget = function(target) {
@@ -551,29 +575,29 @@ window.update = function(dt) {
     if (p.destruction) {
       p.destruction.elapsed += dt;
       p.destruction.pieces.forEach(piece => {
-        piece.x += piece.vx * dt;
-        piece.y += piece.vy * dt;
-        piece.vy += 900 * dt;
-        piece.rotation += piece.spin * dt;
+        piece.x += (piece.vx - speed) * dt;
+        if (!piece.grounded) {
+          piece.y += piece.vy * dt;
+          piece.vy += 900 * dt;
+          piece.rotation += piece.spin * dt;
+          if (piece.y + piece.sourceHeight >= window.H - window.groundH) {
+            piece.y = window.H - window.groundH - piece.sourceHeight;
+            piece.vy = 0;
+            piece.rotation = 0;
+            piece.grounded = true;
+          }
+        }
       });
-      p.x -= speed * dt;
-      if (p.destruction.elapsed >= window.GAME_CONFIG.PAPPU_HAMZA_PIPE_FALL_DURATION || p.x < -window.PIPE_WIDTH - 10) {
-        window.pipes.splice(i, 1);
-      }
-      continue;
     }
     p.x -= speed * dt;
     if (!p.passed && p.x + window.PIPE_WIDTH < window.bird.x) {
-      p.passed = true; window.score++; window.hudScoreEl.textContent = window.score; window.spawnCoinBurst();
-      if (window.systumHackTimer > 0) {
-        window.systumBonusCoins += Math.floor(window.COINS_PER_POINT) * (window.systumHackMultiplier - 1);
+      window.awardPipeScore(p);
+    }
+    if (p.destruction) {
+      if (p.destruction.pieces.every(piece => piece.x + window.PIPE_WIDTH < -10)) {
+        window.pipes.splice(i, 1);
       }
-      if (boostActive && window.vandePipesRemaining > 0) window.vandePipesRemaining--;
-      if (window.score > 0 && window.score % 50 === 0) {
-        window.playSound(window.audioWahModijiWah);
-        window.spawnCoinBurst();
-        window.spawnLotusRain();
-      }
+      continue;
     }
     if (p.x < -window.PIPE_WIDTH - 10) window.pipes.splice(i, 1);
     if (!skillInvulnerable && (
@@ -840,7 +864,8 @@ window.loop = function(ts) {
 // Canvas setup (global)
 window.W = 0; window.H = 0; window.DPR = 1; window.groundH = 0;
 window.resizeCanvas = function() {
-  const maxDpr = window.app && window.app.getAttribute("data-theme") === "diwali" ? 1.25 : 2;
+  const isSmallOrTouchDevice = window.innerWidth <= 600 || window.matchMedia("(pointer: coarse)").matches;
+  const maxDpr = isSmallOrTouchDevice ? 1.25 : 2;
   window.DPR = Math.min(window.devicePixelRatio || 1, maxDpr);
   window.W = window.innerWidth; window.H = window.innerHeight;
   window.canvas.width = Math.floor(window.W * window.DPR);
@@ -888,11 +913,11 @@ window.init = async function() {
   window.menuStoreBtn = document.getElementById("menu-store-btn");
   window.pauseBtn = document.getElementById("pause-btn");
   window.systumSkillBtn = document.getElementById("systum-skill-btn");
-  window.systumSkillStatusEl = document.getElementById("systum-skill-status");
+  window.systumSkillTimerEl = document.getElementById("systum-skill-timer");
   window.vandeSkillBtn = document.getElementById("vande-skill-btn");
-  window.vandeSkillStatusEl = document.getElementById("vande-skill-status");
+  window.vandeSkillTimerEl = document.getElementById("vande-skill-timer");
   window.pappuSkillBtn = document.getElementById("pappu-skill-btn");
-  window.pappuSkillStatusEl = document.getElementById("pappu-skill-status");
+  window.pappuSkillTimerEl = document.getElementById("pappu-skill-timer");
   window.resumeBtn = document.getElementById("resume-btn");
   window.pauseHomeBtn = document.getElementById("pause-home-btn");
   window.goHomeBtn = document.getElementById("go-home-btn");

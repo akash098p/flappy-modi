@@ -210,19 +210,34 @@ html,body{
 }
 .skill-count-card{
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:4px;
+  gap:2px;
   flex:1;
   min-width:0;
-  padding:4px 6px;
+  padding:5px 4px;
   border:2px solid var(--ink);
   border-radius:var(--radius-md);
   background:rgba(255,255,255,.92);
   box-shadow:0 2px 0 rgba(0,0,0,.15);
-  font-family:var(--font-display);
-  font-size:clamp(9px, 2.8vw, 12px);
+  font-size:9px;
   white-space:nowrap;
+}
+.skill-count-name{
+  font-family:var(--font-body);
+  font-weight:600;
+  line-height:1;
+}
+.skill-count-value{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  min-height:22px;
+  font-family:var(--font-display);
+  font-size:clamp(14px, 4vw, 18px);
+  line-height:1.2;
 }
 .skill-count-card img{
   width:22px;
@@ -1209,11 +1224,13 @@ kbd{
   z-index:6;
 }
 .skill-btn{
-  display:flex; align-items:center; gap:5px;
-  justify-content:space-between;
-  width:62px;
-  min-height:40px;
-  padding:4px 5px;
+  position:relative;
+  overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  width:46px;
+  height:46px;
+  min-height:46px;
+  padding:4px;
   border:2px solid var(--ink);
   border-radius:14px;
   background:rgba(255,255,255,.9);
@@ -1225,9 +1242,36 @@ kbd{
   cursor:pointer;
   touch-action:manipulation;
 }
-.skill-btn img{ width:24px; height:24px; object-fit:contain; }
+.skill-btn img{
+  position:relative;
+  z-index:1;
+  width:24px;
+  height:24px;
+  object-fit:contain;
+}
+.skill-timer{
+  position:absolute;
+  inset:50% auto auto 50%;
+  transform:translate(-50%, -50%);
+  color:var(--theme-glow);
+  font-family:var(--font-display);
+  font-size:21px;
+  line-height:1;
+  opacity:.65;
+  -webkit-text-stroke:1px var(--ink);
+  text-shadow:0 1px 2px var(--ink);
+  white-space:nowrap;
+  pointer-events:none;
+}
+.skill-timer:empty{ display:none; }
+.skill-btn.active img{
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:16px;
+  height:16px;
+}
 .skill-btn:disabled{ opacity:.55; cursor:not-allowed; }
-.skill-status{ font-variant-numeric:tabular-nums; white-space:nowrap; }
 .hud-item{
   display:flex; align-items:center; gap:4px;
   font-family:var(--font-display); font-weight:800; font-size:16px;
@@ -1566,7 +1610,15 @@ kbd{
 }
 
 @media (max-width:600px){
-  .home-middle{ margin-bottom:auto; }
+  .home-inner{ padding-bottom:max(52px, calc(48px + env(safe-area-inset-bottom))); }
+  .home-middle{ width:100%; margin-bottom:auto; }
+  #play-btn{ margin-top:30px; }
+  .home-bottom{ transform:translateY(9px); }
+}
+
+@media (max-width:600px) and (max-height:680px){
+  .home-inner{ padding-bottom:max(28px, calc(24px + env(safe-area-inset-bottom))); }
+  #play-btn{ margin-top:16px; }
 }
 
 @media (max-height:680px){
@@ -1575,8 +1627,9 @@ kbd{
   .btn-primary{ padding:6px 26px; font-size:clamp(15px,4vw,19px); }
   .stats-row{ gap:4px; max-width:310px; }
   .skill-counts-row{ gap:4px; max-width:310px; }
-  .skill-count-card{ gap:3px; padding:3px 4px; font-size:9px; }
+  .skill-count-card{ gap:2px; padding:3px 4px; font-size:8px; }
   .skill-count-card img{ width:18px; height:18px; }
+  .skill-count-value{ min-height:18px; }
   .stat-card{ padding:3px 4px; }
   .stat-label{ font-size:7px; }
   .stat-value{ font-size:16px; }
@@ -1591,7 +1644,7 @@ kbd{
   .btn-primary{ padding:5px 22px; font-size:clamp(13px,3.5vw,17px); }
   .stats-row{ gap:3px; max-width:270px; }
   .skill-counts-row{ gap:3px; max-width:270px; }
-  .skill-count-card{ gap:2px; padding:2px 3px; font-size:8px; }
+  .skill-count-card{ gap:2px; padding:2px 3px; font-size:7px; }
   .skill-count-card img{ width:16px; height:16px; }
   .stat-card{ padding:2px 3px; }
   .stat-label{ font-size:6px; }
