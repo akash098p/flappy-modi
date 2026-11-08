@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <link rel="icon" type="image/png" href="images/logo.png" />
 <title>Flappy Modi</title>
-<link rel="stylesheet" href="style.css?v=20261108-home-settings" />
+<link rel="stylesheet" href="style.css?v=20261109-skill-timers" />
 </head>
 <body>
 
@@ -52,19 +52,25 @@
       <div class="home-middle">
         <div class="skill-counts-row" aria-label="Available skill charges">
           <div class="skill-count-card">
-            <img src="images/system hack.png" alt="" />
-            <span>Systum</span>
-            <strong id="home-systum-charges">0</strong>
+            <span class="skill-count-name">Systum Hack</span>
+            <div class="skill-count-value">
+              <img src="images/system hack.png" alt="" />
+              <strong id="home-systum-charges">0</strong>
+            </div>
           </div>
           <div class="skill-count-card">
-            <img src="images/vande boost.png" alt="" />
-            <span>Vande</span>
-            <strong id="home-vande-charges">0</strong>
+            <span class="skill-count-name">Vande Boost</span>
+            <div class="skill-count-value">
+              <img src="images/vande boost.png" alt="" />
+              <strong id="home-vande-charges">0</strong>
+            </div>
           </div>
           <div class="skill-count-card">
-            <img src="images/pappu hamza.png" alt="" />
-            <span>Pappu</span>
-            <strong id="home-pappu-charges">0</strong>
+            <span class="skill-count-name">Pappu Hamza</span>
+            <div class="skill-count-value">
+              <img src="images/pappu hamza.png" alt="" />
+              <strong id="home-pappu-charges">0</strong>
+            </div>
           </div>
         </div>
         <div class="stats-row">
@@ -234,13 +240,16 @@
       </div>
       <div id="hud-skills">
         <button id="systum-skill-btn" class="skill-btn" type="button" aria-label="Activate Systum Hack">
-          <img src="images/system hack.png" alt="" /><span id="systum-skill-status" class="skill-status">×0</span>
+          <span id="systum-skill-timer" class="skill-timer" aria-hidden="true"></span>
+          <img src="images/system hack.png" alt="" />
         </button>
         <button id="vande-skill-btn" class="skill-btn" type="button" aria-label="Activate Vande Boost">
-          <img src="images/vande boost.png" alt="" /><span id="vande-skill-status" class="skill-status">×0</span>
+          <span id="vande-skill-timer" class="skill-timer" aria-hidden="true"></span>
+          <img src="images/vande boost.png" alt="" />
         </button>
         <button id="pappu-skill-btn" class="skill-btn" type="button" aria-label="Activate Pappu Hamza">
-          <img src="images/pappu hamza.png" alt="" /><span id="pappu-skill-status" class="skill-status">×0</span>
+          <span id="pappu-skill-timer" class="skill-timer" aria-hidden="true"></span>
+          <img src="images/pappu hamza.png" alt="" />
         </button>
       </div>
       <button id="pause-btn" aria-label="Pause">II</button>
@@ -337,11 +346,11 @@
 <audio id="audio-pappu-pipe-gaya" src="audio/gaya.mp3" preload="auto"></audio>
 
   <!-- Load game modules in order -->
-  <script src="config.js?v=20261108-pappu-parts"></script>
+  <script src="config.js?v=20261109-pappu-debris"></script>
   <script src="audio.js?v=20261108-pappu-pipe-pieces"></script>
   <script src="entities.js?v=20261108-pappu-pipe-pieces"></script>
   <script src="decorations.js"></script>
   <script src="ui.js?v=20261108-home-settings"></script>
-  <script src="main.js?v=20261108-pappu-pipe-pieces"></script>
+  <script src="main.js?v=20261109-desktop-bird-size"></script>
 </body>
 </html>
