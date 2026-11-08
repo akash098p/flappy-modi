@@ -20,9 +20,31 @@ window.audioRewards = document.getElementById("audio-rewards");
 window.audioWhaKyaSceneHai = document.getElementById("audio-wha-kya-scene-hai");
 window.audioGiveUp = document.getElementById("audio-give-up");
 window.audioWahModijiWah = document.getElementById("audio-wah-modiji-wah");
+window.audioPappuBurn = document.getElementById("audio-pappu-burn");
+window.audioPappuPipeSounds = [
+  document.getElementById("audio-pappu-pipe-khatam"),
+  document.getElementById("audio-pappu-pipe-tata"),
+  document.getElementById("audio-pappu-pipe-goodbye"),
+  document.getElementById("audio-pappu-pipe-gaya"),
+];
+window.pappuPipeSoundIndex = 0;
+window.pappuPipeSoundQueue = [];
+
+window.playNextPappuPipeSound = function() {
+  const sound = window.pappuPipeSoundQueue[0];
+  if (!sound) return;
+  sound.onended = () => {
+    if (window.pappuPipeSoundQueue[0] !== sound) return;
+    sound.onended = null;
+    window.pappuPipeSoundQueue.shift();
+    window.playNextPappuPipeSound();
+  };
+  window.playSound(sound);
+}
 
 // Volume settings
-window.audioBgm.volume = 0.88;
+window.BGM_BASE_VOLUME = 0.88;
+window.audioBgm.volume = window.BGM_BASE_VOLUME;
 window.audioJump.volume = 0.7;
 window.audioGameover.volume = 0.8;
 window.audioStart.volume = 0.8;
@@ -39,10 +61,28 @@ window.audioAnimation.volume = 0.7;
 window.audioRewards.volume = 0.8;
 window.audioWhaKyaSceneHai.volume = 0.9;
 window.audioGiveUp.volume = 0.8;
+if (window.audioPappuBurn) window.audioPappuBurn.volume = 0.85;
+window.audioPappuPipeSounds.forEach(sound => {
+  if (sound) sound.volume = 0.85;
+});
+
+window.playPappuPipeAttackSound = function() {
+  const sound = window.audioPappuPipeSounds[window.pappuPipeSoundIndex];
+  window.pappuPipeSoundIndex = (window.pappuPipeSoundIndex + 1) % window.audioPappuPipeSounds.length;
+  if (!sound) return;
+  window.pappuPipeSoundQueue.push(sound);
+  if (window.pappuPipeSoundQueue.length === 1) window.playNextPappuPipeSound();
+}
 
 window.activeDuckingCount = 0;
 const DUCKED_BGM_VOLUME = 0.20;
-const NORMAL_BGM_VOLUME = 0.88;
+window.applyBgmVolume = function() {
+  const setting = window.audioSettings ? window.audioSettings.bgm : 1;
+  const duckingScale = window.activeDuckingCount > 0
+    ? DUCKED_BGM_VOLUME / window.BGM_BASE_VOLUME
+    : 1;
+  window.audioBgm.volume = window.BGM_BASE_VOLUME * setting * duckingScale;
+}
 
 // Play sound helper (global)
 window.playSound = function(el) {
@@ -56,14 +96,16 @@ window.playSound = function(el) {
       el === window.audioWahModijiWah ||
       el === window.audioWhaKyaSceneHai ||
       el === window.audioOoh ||
-      el === window.audioMelody
+      el === window.audioMelody ||
+      el === window.audioPappuBurn ||
+      window.audioPappuPipeSounds.includes(el)
     ) {
       if (el._duckCleanup) {
         el._duckCleanup();
       }
 
       window.activeDuckingCount++;
-      window.audioBgm.volume = DUCKED_BGM_VOLUME;
+      window.applyBgmVolume();
 
       const restoreVolume = () => {
         if (el._duckCleanup) {
@@ -74,9 +116,7 @@ window.playSound = function(el) {
           }
           el._duckCleanup = null;
           window.activeDuckingCount = Math.max(0, window.activeDuckingCount - 1);
-          if (window.activeDuckingCount === 0) {
-            window.audioBgm.volume = NORMAL_BGM_VOLUME;
-          }
+          window.applyBgmVolume();
         }
       };
 
@@ -115,15 +155,46 @@ window.playIntroAudioSequence = function() {
   }
 }
 
-// Game background music — uses the selected song (global)
-window.playBgm = function() {
-  try {
-    const song = SONGS.find(s => s.id === save.selectedSong) || SONGS[0];
-    window.audioBgm.src = song.src;
-    window.audioBgm.currentTime = 0;
-    window.audioBgm.play().catch(() => {});
-  } catch (e) { /* ignore */ }
+window.randomSongQueue = [];
+window.currentBgmSongId = null;
+
+window.shuffleSongs = function() {
+  const shuffled = [...window.SONGS];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  if (shuffled.length > 1 && shuffled[0].id === window.currentBgmSongId) {
+    [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
+  }
+  return shuffled;
 }
+
+window.playNextBgmSong = function() {
+  let song;
+  if (window.audioSettings.randomSongs) {
+    if (!window.randomSongQueue.length) window.randomSongQueue = window.shuffleSongs();
+    song = window.randomSongQueue.shift();
+  } else {
+    song = window.SONGS.find(item => item.id === window.save.selectedSong) || window.SONGS[0];
+  }
+  if (!song) return;
+  window.currentBgmSongId = song.id;
+  window.audioBgm.src = song.src;
+  window.audioBgm.currentTime = 0;
+  window.applyBgmVolume();
+  window.audioBgm.play().catch(() => {});
+}
+
+// Game music repeats the selected track or advances through a shuffled playlist.
+window.playBgm = function() {
+  window.randomSongQueue = window.audioSettings.randomSongs ? window.shuffleSongs() : [];
+  window.playNextBgmSong();
+}
+
+window.audioBgm.addEventListener("ended", () => {
+  if (window.state === "playing") window.playNextBgmSong();
+});
 
 window.stopBgm = function() {
   window.audioBgm.pause();

@@ -20,6 +20,17 @@ window.respawnCount = 0;
 window.cockroachSoundToggle = false;
 window.respawnTimerId = null;
 window.respawnTimeLeft = 5;
+window.systumHackTimer = 0;
+window.systumHackMultiplier = 1;
+window.systumBonusCoins = 0;
+window.vandeBoostTimer = 0;
+window.vandePipesRemaining = 0;
+window.vandeBoostFloatY = 0;
+window.vandeBoostManualControl = false;
+window.pappuHamzaTimer = 0;
+window.pappuFireCooldown = 0;
+window.pappuProjectiles = [];
+window.pappuEffects = [];
 
 // DOM element references (global)
 window.app = null; window.homeScreen = null; window.gameScreen = null; window.themeScreen = null; window.vehicleScreen = null; window.songScreen = null; window.storeScreen = null;
@@ -31,6 +42,9 @@ window.spinBtn = null; window.closeRouletteBtn = null;
 window.rouletteOverlay = null; window.rouletteTrack = null;
 window.respawnOverlay = null; window.gameoverOverlay = null; window.pauseOverlay = null; window.getReadyOverlay = null;
 window.hudScoreEl = null; window.hudHitsEl = null; window.hudMelodiesEl = null;
+window.systumSkillBtn = null; window.systumSkillStatusEl = null;
+window.vandeSkillBtn = null; window.vandeSkillStatusEl = null;
+window.pappuSkillBtn = null; window.pappuSkillStatusEl = null;
 window.goScoreEl = null; window.goBestEl = null; window.goCoinsEl = null; window.goMelodiesEl = null;
 window.respawnCostText = null;
 window.allScreens = null;
@@ -51,10 +65,11 @@ window.audioSettings = (function() {
       return {
         sfx: typeof parsed.sfx === "number" ? parsed.sfx : 0.8,
         bgm: typeof parsed.bgm === "number" ? parsed.bgm : 0.88,
+        randomSongs: parsed.randomSongs === true,
       };
     }
   } catch (e) { /* ignore */ }
-  return { sfx: 0.8, bgm: 0.88 };
+  return { sfx: 0.8, bgm: 0.88, randomSongs: false };
 })();
 
 window.saveAudioSettings = function() {
@@ -70,7 +85,7 @@ window.SFX_AUDIO_IDS = [
   ["audioWhaKyaSceneHai", 0.9], ["audioGiveUp", 0.8],
 ];
 window.BGM_AUDIO_IDS = [
-  ["audioBgm", 0.88], ["audioHomeBg", 0.9], ["audioPreview", 0.5], ["audioAnimation", 0.7],
+  ["audioBgm", window.BGM_BASE_VOLUME], ["audioHomeBg", 0.9], ["audioPreview", 0.5], ["audioAnimation", 0.7],
 ];
 
 window.applyAudioVolumes = function() {
@@ -78,9 +93,17 @@ window.applyAudioVolumes = function() {
     const el = window[key];
     if (el) el.volume = base * window.audioSettings.sfx;
   });
+  [window.audioPappuBurn, ...(window.audioPappuPipeSounds || [])].forEach(el => {
+    if (el) el.volume = 0.85 * window.audioSettings.sfx;
+  });
   window.BGM_AUDIO_IDS.forEach(([key, base]) => {
     const el = window[key];
-    if (el) el.volume = base * window.audioSettings.bgm;
+    if (!el) return;
+    if (key === "audioBgm") {
+      window.applyBgmVolume();
+    } else {
+      el.volume = base * window.audioSettings.bgm;
+    }
   });
 }
 
@@ -110,6 +133,8 @@ window.loadImage = function(src) {
 window.defaultSave = function() {
   return {
     bestScore: 0, coins: 0, melodies: 0, hits: 2,
+    ownedStoreItems: [],
+    skillCharges: { systumHack: 1, vandeBoost: 1, pappuHamza: 1 },
     unlockedThemes: ["day"], unlockedVehicles: ["flappy1"],
     selectedTheme: "day", selectedVehicle: "flappy1", selectedSong: "udta",
   };
@@ -150,6 +175,218 @@ window.getRespawnCost = function() {
   return Math.pow(2, window.respawnCount);
 }
 
+window.getVandeBoostSpeedMultiplier = function() {
+  if (window.vandeBoostTimer <= 0) return 1;
+  let elapsed = window.GAME_CONFIG.VANDE_BOOST_DURATION - window.vandeBoostTimer;
+  for (const phase of window.GAME_CONFIG.VANDE_BOOST_SPEED_PHASES) {
+    if (elapsed < phase.duration) return phase.multiplier;
+    elapsed -= phase.duration;
+  }
+  return window.GAME_CONFIG.VANDE_BOOST_SPEED_PHASES.slice(-1)[0].multiplier;
+}
+
+window.activatePappuHamza = function() {
+  const charges = window.save.skillCharges;
+  if (window.state !== "playing" || window.pappuHamzaTimer > 0 || !charges || charges.pappuHamza < 1) return;
+  charges.pappuHamza--;
+  window.pappuHamzaTimer = window.GAME_CONFIG.PAPPU_HAMZA_DURATION;
+  window.pappuFireCooldown = 0;
+  window.saveGameState();
+  window.playPurchase();
+  window.updateSkillButtons();
+}
+
+window.spawnPappuImpact = function(x, y) {
+  for (let i = 0; i < 12; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = window.rand(70, 190);
+    window.pappuEffects.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: window.rand(0.24, 0.48),
+      maxLife: 0.48,
+      size: window.rand(2, 5),
+    });
+  }
+}
+
+window.createPappuPipePieces = function(pipe) {
+  const floorY = window.H - window.groundH;
+  const pieces = [];
+  [[0, pipe.gapTop, true], [pipe.gapBottom, floorY - pipe.gapBottom, false]].forEach(([segmentY, height, isTop]) => {
+    if (height <= 0) return;
+    const pieceHeight = Math.max(42, Math.min(88, height / 5));
+    for (let sourceY = 0; sourceY < height; sourceY += pieceHeight) {
+      const sourceHeight = Math.min(pieceHeight, height - sourceY);
+      pieces.push({
+        isTop,
+        sourceY,
+        sourceHeight,
+        x: pipe.x,
+        y: segmentY + sourceY,
+        vx: window.rand(-48, 48),
+        vy: window.rand(-12, 72),
+        rotation: 0,
+        spin: window.rand(-1.5, 1.5),
+      });
+    }
+  });
+  return pieces;
+}
+
+window.updatePappuHamza = function(dt) {
+  if (window.pappuHamzaTimer > 0) {
+    window.pappuFireCooldown -= dt;
+    if (window.pappuFireCooldown <= 0 && window.bird) {
+      const targets = [];
+      window.pipes.forEach(pipe => {
+        if (pipe.destruction || pipe.pappuTargeted || pipe.x + window.PIPE_WIDTH < window.bird.x) return;
+        const upperY = pipe.gapTop / 2;
+        const lowerY = pipe.gapBottom + (window.H - window.groundH - pipe.gapBottom) / 2;
+        const targetY = Math.abs(window.bird.y - upperY) <= Math.abs(window.bird.y - lowerY) ? upperY : lowerY;
+        targets.push({ target: pipe, type: "pipe", x: pipe.x + window.PIPE_WIDTH / 2, y: targetY });
+      });
+      window.cockroaches.forEach(cockroach => {
+        if (cockroach.burning || cockroach.pappuTargeted || cockroach.x < window.bird.x - cockroach.size) return;
+        targets.push({
+          target: cockroach,
+          type: "cockroach",
+          x: cockroach.x,
+          y: cockroach.y + Math.sin(cockroach.bob) * 8,
+        });
+      });
+      targets.sort((a, b) => {
+        const distanceA = Math.hypot(a.x - window.bird.x, a.y - window.bird.y);
+        const distanceB = Math.hypot(b.x - window.bird.x, b.y - window.bird.y);
+        return distanceA - distanceB;
+      });
+      const target = targets[0];
+      if (target) {
+        target.target.pappuTargeted = true;
+        window.pappuProjectiles.push({
+          x: window.bird.x + window.bird.size * 0.28,
+          y: window.bird.y,
+          target: target.target,
+          type: target.type,
+          rotation: 0,
+          life: 0,
+          size: window.GAME_CONFIG.PAPPU_HAMZA_PROJECTILE_SIZE,
+        });
+        window.pappuFireCooldown = window.GAME_CONFIG.PAPPU_HAMZA_FIRE_INTERVAL;
+      } else {
+        window.pappuFireCooldown = 0.1;
+      }
+    }
+  }
+
+  for (let i = window.pappuProjectiles.length - 1; i >= 0; i--) {
+    const projectile = window.pappuProjectiles[i];
+    const target = projectile.target;
+    projectile.life = (projectile.life || 0) + dt;
+    const targetStillExists = projectile.type === "pipe"
+      ? window.pipes.includes(target)
+      : window.cockroaches.includes(target);
+    if (!target || !targetStillExists || projectile.life > 2.5 || (projectile.type === "pipe" ? target.destruction : target.burning)) {
+      if (target && targetStillExists && !target.destruction && !target.burning) target.pappuTargeted = false;
+      window.pappuProjectiles.splice(i, 1);
+      continue;
+    }
+    const targetX = projectile.type === "pipe" ? target.x + window.PIPE_WIDTH / 2 : target.x;
+    const targetY = projectile.type === "pipe"
+      ? (Math.abs(window.bird.y - target.gapTop / 2) <= Math.abs(window.bird.y - (target.gapBottom + (window.H - window.groundH - target.gapBottom) / 2))
+        ? target.gapTop / 2
+        : target.gapBottom + (window.H - window.groundH - target.gapBottom) / 2)
+      : target.y + Math.sin(target.bob) * 8;
+    const dx = targetX - projectile.x;
+    const dy = targetY - projectile.y;
+    const distance = Math.hypot(dx, dy);
+    projectile.rotation = Math.atan2(dy, dx);
+    const travel = window.GAME_CONFIG.PAPPU_HAMZA_PROJECTILE_SPEED * dt;
+    if (distance <= travel + (projectile.type === "pipe" ? window.PIPE_WIDTH * 0.35 : target.size * 0.35)) {
+      if (projectile.type === "pipe") {
+        target.destruction = {
+          elapsed: 0,
+          pieces: window.createPappuPipePieces(target),
+        };
+        window.playPappuPipeAttackSound();
+      } else {
+        target.burning = { elapsed: 0 };
+        window.playSound(window.audioPappuBurn);
+      }
+      if (projectile.type === "cockroach") window.spawnPappuImpact(targetX, targetY);
+      window.pappuProjectiles.splice(i, 1);
+      continue;
+    }
+    projectile.x += dx / distance * travel;
+    projectile.y += dy / distance * travel;
+  }
+
+  for (let i = window.pappuEffects.length - 1; i >= 0; i--) {
+    const effect = window.pappuEffects[i];
+    effect.life -= dt;
+    effect.x += effect.vx * dt;
+    effect.y += effect.vy * dt;
+    effect.vx *= Math.max(0, 1 - dt * 2);
+    effect.vy *= Math.max(0, 1 - dt * 2);
+    if (effect.life <= 0) window.pappuEffects.splice(i, 1);
+  }
+}
+
+window.updateSkillButtons = function() {
+  if (!window.systumSkillBtn || !window.vandeSkillBtn || !window.pappuSkillBtn) return;
+  const charges = window.save.skillCharges || {};
+  const systumActive = window.systumHackTimer > 0;
+  const vandeActive = window.vandeBoostTimer > 0;
+  const pappuActive = window.pappuHamzaTimer > 0;
+  const systumStatus = systumActive
+    ? `${Math.ceil(window.systumHackTimer)}s`
+    : `×${charges.systumHack || 0}`;
+  const vandeStatus = vandeActive
+    ? `${Math.ceil(window.vandeBoostTimer)}s`
+    : `×${charges.vandeBoost || 0}`;
+  const pappuStatus = pappuActive
+    ? `${Math.ceil(window.pappuHamzaTimer)}s`
+    : `×${charges.pappuHamza || 0}`;
+  if (window.systumSkillStatusEl.textContent !== systumStatus) window.systumSkillStatusEl.textContent = systumStatus;
+  if (window.vandeSkillStatusEl.textContent !== vandeStatus) window.vandeSkillStatusEl.textContent = vandeStatus;
+  if (window.pappuSkillStatusEl.textContent !== pappuStatus) window.pappuSkillStatusEl.textContent = pappuStatus;
+  const systumDisabled = window.state !== "playing" || (!systumActive && !(charges.systumHack > 0));
+  const vandeDisabled = window.state !== "playing" || (!vandeActive && !(charges.vandeBoost > 0));
+  const pappuDisabled = window.state !== "playing" || (!pappuActive && !(charges.pappuHamza > 0));
+  if (window.systumSkillBtn.disabled !== systumDisabled) window.systumSkillBtn.disabled = systumDisabled;
+  if (window.vandeSkillBtn.disabled !== vandeDisabled) window.vandeSkillBtn.disabled = vandeDisabled;
+  if (window.pappuSkillBtn.disabled !== pappuDisabled) window.pappuSkillBtn.disabled = pappuDisabled;
+}
+
+window.activateSystumHack = function() {
+  const charges = window.save.skillCharges;
+  if (window.state !== "playing" || window.systumHackTimer > 0 || !charges || charges.systumHack < 1) return;
+  charges.systumHack--;
+  window.systumHackMultiplier = Math.random() < 0.5 ? 2 : 3;
+  window.systumHackTimer = window.GAME_CONFIG.SYSTUM_HACK_DURATION;
+  window.saveGameState();
+  window.playPurchase();
+  window.updateSkillButtons();
+}
+
+window.activateVandeBoost = function() {
+  const charges = window.save.skillCharges;
+  if (window.state !== "playing" || window.vandeBoostTimer > 0 || !charges || charges.vandeBoost < 1) return;
+  charges.vandeBoost--;
+  window.vandeBoostTimer = window.GAME_CONFIG.VANDE_BOOST_DURATION;
+  window.vandeBoostFloatY = window.bird.y;
+  window.vandeBoostManualControl = false;
+  window.bird.vy = 0;
+  window.vandePipesRemaining = Math.floor(window.rand(
+    window.GAME_CONFIG.VANDE_BOOST_PIPES_MIN,
+    window.GAME_CONFIG.VANDE_BOOST_PIPES_MAX + 1
+  ));
+  window.saveGameState();
+  window.playPurchase();
+  window.updateSkillButtons();
+}
+
 // Start new game (global)
 window.startNewGame = function() {
   const vehicleData = window.VEHICLES.find(v => v.id === window.save.selectedVehicle) || window.VEHICLES[0];
@@ -161,6 +398,7 @@ window.startNewGame = function() {
     y: window.H * 0.4,
     vy: 0, 
     rotation: 0,
+    shieldTimer: 0,
     size: Math.max(50, Math.min(80, window.W * 0.14)),
   };
   window.pipes = []; window.cockroaches = []; window.melons = []; window.melodies = []; window.particles = [];
@@ -169,6 +407,12 @@ window.startNewGame = function() {
   window.melonTimer = window.rand(window.MELON_INTERVAL_MIN, window.MELON_INTERVAL_MAX);
   window.melodyTimer = window.rand(window.MELODY_INTERVAL_MIN, window.MELODY_INTERVAL_MAX);
   window.melodiesThisRun = 0; window.respawnCount = 0; window.groundOffset = 0;
+  window.systumHackTimer = 0; window.systumHackMultiplier = 1; window.systumBonusCoins = 0;
+  window.vandeBoostTimer = 0; window.vandePipesRemaining = 0;
+  window.vandeBoostFloatY = 0;
+  window.vandeBoostManualControl = false;
+  window.pappuHamzaTimer = 0; window.pappuFireCooldown = 0;
+  window.pappuProjectiles = []; window.pappuEffects = [];
 
   window.state = "ready";
   window.hudScoreEl.textContent = "0";
@@ -180,8 +424,11 @@ window.startNewGame = function() {
 
   window.showScreen("game");
   window.lastTime = performance.now();
-  if (window.rafId) cancelAnimationFrame(window.rafId);
-  window.rafId = requestAnimationFrame(window.loop);
+  if (window.rafId !== null) {
+    cancelAnimationFrame(window.rafId);
+    window.rafId = null;
+  }
+  window.startGameLoop();
 }
 
 // Random number helper (global)
@@ -205,6 +452,18 @@ window.startGameIfNeeded = function() {
 
 window.flap = function() {
   if (window.state !== "playing" && window.state !== "ready") return;
+  if (window.vandeBoostTimer > 0) {
+    if (window.vandeBoostTimer <= window.GAME_CONFIG.VANDE_BOOST_DURATION - window.GAME_CONFIG.VANDE_BOOST_FLOAT_DURATION + 1e-6) {
+      window.vandeBoostManualControl = true;
+      window.bird.vy = window.FLAP_VELOCITY;
+    } else {
+      const minY = window.bird.size * 0.4;
+      window.vandeBoostFloatY = Math.max(minY, window.vandeBoostFloatY - window.bird.size * 0.55);
+      window.bird.vy = 0;
+    }
+    window.playSound(window.audioJump);
+    return;
+  }
   window.bird.vy = window.FLAP_VELOCITY;
   window.playSound(window.audioJump);
 }
@@ -221,17 +480,55 @@ window.onInputStart = function(e) {
 // Game update loop (global)
 window.update = function(dt) {
   window.elapsed += dt;
-  window.groundOffset -= window.PIPE_SPEED * dt;
+  const groundSpeedMultiplier = window.getVandeBoostSpeedMultiplier();
+  window.groundOffset -= window.PIPE_SPEED * groundSpeedMultiplier * dt;
   if (window.groundOffset < -64) window.groundOffset += 64;
 
+  window.updateSkillButtons();
   if (window.state !== "playing") return;
+
+  if (window.systumHackTimer > 0) {
+    window.systumHackTimer = Math.max(0, window.systumHackTimer - dt);
+    if (window.systumHackTimer === 0) window.systumHackMultiplier = 1;
+  }
+  if (window.vandeBoostTimer > 0) {
+    window.vandeBoostTimer = Math.max(0, window.vandeBoostTimer - dt);
+    if (window.vandeBoostTimer === 0) window.vandePipesRemaining = 0;
+  }
+  if (window.pappuHamzaTimer > 0) {
+    window.pappuHamzaTimer = Math.max(0, window.pappuHamzaTimer - dt);
+  }
+  window.updatePappuHamza(dt);
 
   // Bird physics
   if (window.state === "playing") {
-    window.bird.vy += window.GRAVITY * dt;
-    window.bird.vy = Math.min(window.bird.vy, window.MAX_FALL_SPEED);
-    window.bird.y += window.bird.vy * dt;
-    window.bird.rotation = Math.max(-0.5, Math.min(1.1, window.bird.vy / 500));
+    const boostElapsed = window.GAME_CONFIG.VANDE_BOOST_DURATION - window.vandeBoostTimer;
+    const boostFloating = window.vandeBoostTimer > 0 && !window.vandeBoostManualControl;
+    if (boostFloating && boostElapsed < window.GAME_CONFIG.VANDE_BOOST_FLOAT_DURATION) {
+      const floatOffset = Math.sin(window.elapsed * 2.4) * Math.min(8, window.bird.size * 0.1);
+      const minY = window.bird.size * 0.4;
+      const maxY = window.H - window.groundH - window.bird.size * 0.5;
+      window.bird.y += (Math.max(minY, Math.min(maxY, window.vandeBoostFloatY + floatOffset)) - window.bird.y) * Math.min(1, dt * 8);
+      window.bird.vy = 0;
+      window.bird.rotation = Math.sin(window.elapsed * 2.4) * 0.04;
+    } else if (boostFloating) {
+      const descentDuration = window.GAME_CONFIG.VANDE_BOOST_DURATION - window.GAME_CONFIG.VANDE_BOOST_FLOAT_DURATION;
+      const descentProgress = Math.min(1, (boostElapsed - window.GAME_CONFIG.VANDE_BOOST_FLOAT_DURATION) / descentDuration);
+      const easedProgress = descentProgress * descentProgress * (3 - 2 * descentProgress);
+      const minY = window.bird.size * 0.4;
+      const maxY = window.H - window.groundH - window.bird.size * 2;
+      const startY = Math.max(minY, Math.min(maxY, window.vandeBoostFloatY));
+      const endY = window.H - window.groundH - window.bird.size * 1.5;
+      window.bird.y = startY + (endY - startY) * easedProgress;
+      window.bird.vy = 0;
+      window.bird.rotation = Math.min(0.5, easedProgress * 0.5);
+    } else {
+      window.bird.vy += window.GRAVITY * dt;
+      window.bird.vy = Math.min(window.bird.vy, window.MAX_FALL_SPEED);
+      window.bird.y += window.bird.vy * dt;
+      window.bird.rotation = Math.max(-0.5, Math.min(1.1, window.bird.vy / 500));
+    }
+    window.bird.shieldTimer = Math.max(0, window.bird.shieldTimer - dt);
   }
 
   if (window.bird.y < window.bird.size * 0.4) { window.bird.y = window.bird.size * 0.4; window.bird.vy = 0; }
@@ -241,22 +538,48 @@ window.update = function(dt) {
   }
 
   // Pipes
-  const speed = window.PIPE_SPEED + Math.min(window.score * 2.5, 90);
+  const boostActive = window.vandeBoostTimer > 0;
+  const skillInvulnerable = boostActive || window.systumHackTimer > 0 || window.pappuHamzaTimer > 0;
+  const surgeActive = boostActive;
+  const speed = (window.PIPE_SPEED + Math.min(window.score * 2.5, 90)) *
+    (surgeActive ? window.getVandeBoostSpeedMultiplier() : 1);
   window.pipeTimer += dt;
-  if (window.pipeTimer >= window.PIPE_INTERVAL) { window.pipeTimer = 0; window.spawnPipePair(); }
+  const pipeInterval = window.PIPE_INTERVAL / (surgeActive ? window.getVandeBoostSpeedMultiplier() : 1);
+  if (window.pipeTimer >= pipeInterval) { window.pipeTimer = 0; window.spawnPipePair(); }
   for (let i = window.pipes.length - 1; i >= 0; i--) {
     const p = window.pipes[i];
+    if (p.destruction) {
+      p.destruction.elapsed += dt;
+      p.destruction.pieces.forEach(piece => {
+        piece.x += piece.vx * dt;
+        piece.y += piece.vy * dt;
+        piece.vy += 900 * dt;
+        piece.rotation += piece.spin * dt;
+      });
+      p.x -= speed * dt;
+      if (p.destruction.elapsed >= window.GAME_CONFIG.PAPPU_HAMZA_PIPE_FALL_DURATION || p.x < -window.PIPE_WIDTH - 10) {
+        window.pipes.splice(i, 1);
+      }
+      continue;
+    }
     p.x -= speed * dt;
     if (!p.passed && p.x + window.PIPE_WIDTH < window.bird.x) {
       p.passed = true; window.score++; window.hudScoreEl.textContent = window.score; window.spawnCoinBurst();
+      if (window.systumHackTimer > 0) {
+        window.systumBonusCoins += Math.floor(window.COINS_PER_POINT) * (window.systumHackMultiplier - 1);
+      }
+      if (boostActive && window.vandePipesRemaining > 0) window.vandePipesRemaining--;
       if (window.score > 0 && window.score % 50 === 0) {
         window.playSound(window.audioWahModijiWah);
         window.spawnCoinBurst();
+        window.spawnLotusRain();
       }
     }
     if (p.x < -window.PIPE_WIDTH - 10) window.pipes.splice(i, 1);
-    if (window.circleRectCollision(window.bird, { x: p.x, y: 0, w: window.PIPE_WIDTH, h: p.gapTop }) ||
-        window.circleRectCollision(window.bird, { x: p.x, y: p.gapBottom, w: window.PIPE_WIDTH, h: (window.H - window.groundH) - p.gapBottom })) {
+    if (!skillInvulnerable && (
+      window.circleRectCollision(window.bird, { x: p.x, y: 0, w: window.PIPE_WIDTH, h: p.gapTop }) ||
+      window.circleRectCollision(window.bird, { x: p.x, y: p.gapBottom, w: window.PIPE_WIDTH, h: (window.H - window.groundH) - p.gapBottom })
+    )) {
       return window.endGame();
     }
   }
@@ -266,15 +589,34 @@ window.update = function(dt) {
   if (window.cockroachTimer <= 0) { window.spawnCockroach(); window.cockroachTimer = window.rand(window.COCKROACH_INTERVAL_MIN, window.COCKROACH_INTERVAL_MAX); }
   for (let i = window.cockroaches.length - 1; i >= 0; i--) {
     const c = window.cockroaches[i];
+    if (c.burning) {
+      c.burning.elapsed += dt;
+      if (c.burning.elapsed >= window.GAME_CONFIG.PAPPU_HAMZA_COCKROACH_BURN_DURATION) {
+        window.cockroaches.splice(i, 1);
+      }
+      continue;
+    }
     c.x += c.vx * dt; c.bob += dt * 6;
     if (c.x < -120 || c.x > window.W + 120) { window.cockroaches.splice(i, 1); continue; }
     const cy = c.y + Math.sin(c.bob) * 8;
     if (window.circleCircleCollision(window.bird, { x: c.x, y: cy, r: c.size * 0.34 })) {
+      if (window.pappuHamzaTimer > 0) {
+        c.burning = { elapsed: 0 };
+        window.playSound(window.audioPappuBurn);
+        window.spawnPappuImpact(c.x, cy);
+        continue;
+      }
+      if (skillInvulnerable) {
+        window.cockroaches.splice(i, 1);
+        continue;
+      }
       if (window.save.hits > 0) {
         window.save.hits--;
         window.saveGameState();
         window.updateHud();
-        window.cockroaches.splice(i, 1); window.bird.vy = -200;
+        window.cockroaches.splice(i, 1);
+        window.bird.shieldTimer = 1.2;
+        if (c.vx < 0) window.bird.vy = -200;
         window.playSound(window.audioOoh);
         continue;
       } else { return window.endGame("cockroach"); }
@@ -310,7 +652,8 @@ window.update = function(dt) {
     m.x -= speed * dt; m.bob += dt * 4;
     if (m.x < -window.MELODY_SIZE - 10) { window.melodies.splice(i, 1); continue; }
     if (!m.collected && window.circleCircleCollision(window.bird, { x: m.x, y: m.y, r: m.size * 0.42 })) {
-      m.collected = true; window.melodiesThisRun++; window.save.melodies++;
+      const melodyReward = window.systumHackTimer > 0 ? window.systumHackMultiplier : 1;
+      m.collected = true; window.melodiesThisRun += melodyReward; window.save.melodies += melodyReward;
       window.saveGameState();
       window.updateHud(); window.playSound(window.audioMelody);
       window.spawnMelodyBurst(m.x, m.y); window.melodies.splice(i, 1);
@@ -320,8 +663,12 @@ window.update = function(dt) {
   // Particles
   for (let i = window.particles.length - 1; i >= 0; i--) {
     const pt = window.particles[i];
-    pt.life -= dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.vy += 400 * dt;
-    if (pt.life <= 0) window.particles.splice(i, 1);
+    pt.life -= dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt;
+    pt.vy += (pt.color === "lotus" ? 18 : 400) * dt;
+    if (pt.color === "lotus") pt.angle += pt.rotationSpeed * dt;
+    if (pt.life <= 0 || (pt.color === "lotus" && pt.y >= window.H - window.groundH - pt.size)) {
+      window.particles.splice(i, 1);
+    }
   }
 }
 
@@ -355,7 +702,7 @@ window.calculateCoins = function(score) {
 };
 
 window.finalizeGameOver = function() {
-  const earned = window.calculateCoins(window.score);
+  const earned = window.calculateCoins(window.score) + window.systumBonusCoins;
   window.save.coins += earned;
   if (window.score > window.save.bestScore) window.save.bestScore = window.score;
   window.saveGameState();
@@ -385,6 +732,7 @@ window.doRespawn = function() {
   window.lastTime = performance.now();
   window.playSound(window.audioWhaKyaSceneHai);
   window.audioBgm.play().catch(() => {});
+  window.startGameLoop();
 }
 
 window.showRespawnOverlay = function() {
@@ -427,7 +775,10 @@ window.clearRespawnTimer = function() {
 
 window.goHome = function() {
   window.state = "ready";
-  if (window.rafId) cancelAnimationFrame(window.rafId);
+  if (window.rafId !== null) {
+    cancelAnimationFrame(window.rafId);
+    window.rafId = null;
+  }
   window.stopBgm();
   window.renderPickers();
   window.showScreen("home");
@@ -435,18 +786,24 @@ window.goHome = function() {
 }
 
 // Main render loop (global)
-window.draw = function() {
+window.draw = function(dt = 0) {
   window.ctx.clearRect(0, 0, window.W, window.H);
-  window.updateAndDrawDecorations(1/60);
+  window.updateAndDrawDecorations(dt);
   window.drawMelons(); window.drawPipes(); window.drawCockroaches(); window.drawMelodies();
   window.drawGround();
+  window.drawHitShield();
   
   // Draw bird directly (not via function call to avoid scope issues)
   if (window.bird) {
     const s = window.bird.size;
+    const skillEndingSoon = [window.systumHackTimer, window.vandeBoostTimer, window.pappuHamzaTimer]
+      .some(timer => timer > 0 && timer <= 3);
     window.ctx.save();
     window.ctx.translate(window.bird.x, window.bird.y);
     window.ctx.rotate(window.bird.rotation);
+    if (skillEndingSoon && Math.floor(window.elapsed * 8) % 2 !== 0) {
+      window.ctx.globalAlpha = 0.3;
+    }
     if (window.currentVehicleImg && window.currentVehicleImg.complete && window.currentVehicleImg.naturalWidth > 0) {
       window.ctx.drawImage(window.currentVehicleImg, -s / 2, -s / 2, s, s);
     } else {
@@ -457,27 +814,33 @@ window.draw = function() {
     }
     window.ctx.restore();
   }
-  
+  window.drawPappuEffects();
   window.drawParticles();
 }
 
+window.startGameLoop = function() {
+  if (window.rafId !== null || !window.gameScreen.classList.contains("active")) return;
+  window.lastTime = performance.now();
+  window.rafId = requestAnimationFrame(window.loop);
+}
+
 window.loop = function(ts) {
+  window.rafId = null;
+  if (!window.gameScreen.classList.contains("active")) return;
   const dt = Math.min(0.033, (ts - window.lastTime) / 1000 || 0);
   window.lastTime = ts;
-  if (window.state === "playing" || window.state === "ready") window.update(dt);
-  else if (window.state !== "paused" && window.state !== "respawning") window.update(dt);
-  window.draw();
-  if (window.state !== "gameover" || window.gameoverJustEnded()) {
+  const active = window.state === "playing" || window.state === "ready";
+  if (active) window.update(dt);
+  window.draw(active ? dt : 0);
+  if (window.state === "playing" || window.state === "ready") {
     window.rafId = requestAnimationFrame(window.loop);
   }
 }
 
-window.gameoverJustEnded = function() { return true; }
-
 // Canvas setup (global)
 window.W = 0; window.H = 0; window.DPR = 1; window.groundH = 0;
 window.resizeCanvas = function() {
-  const maxDpr = window.app && window.app.getAttribute("data-theme") === "diwali" ? 1.25 : 2.5;
+  const maxDpr = window.app && window.app.getAttribute("data-theme") === "diwali" ? 1.25 : 2;
   window.DPR = Math.min(window.devicePixelRatio || 1, maxDpr);
   window.W = window.innerWidth; window.H = window.innerHeight;
   window.canvas.width = Math.floor(window.W * window.DPR);
@@ -506,6 +869,9 @@ window.init = async function() {
   window.homeCoinsEl = document.getElementById("home-coins");
   window.homeMelodiesEl = document.getElementById("home-melodies");
   window.homeHitsEl = document.getElementById("home-hits");
+  window.homeSystumChargesEl = document.getElementById("home-systum-charges");
+  window.homeVandeChargesEl = document.getElementById("home-vande-charges");
+  window.homePappuChargesEl = document.getElementById("home-pappu-charges");
   window.themeListEl = document.getElementById("theme-list");
   window.vehicleListEl = document.getElementById("vehicle-list");
   window.songListEl = document.getElementById("song-list");
@@ -521,6 +887,12 @@ window.init = async function() {
   window.menuSongsBtn = document.getElementById("menu-songs-btn");
   window.menuStoreBtn = document.getElementById("menu-store-btn");
   window.pauseBtn = document.getElementById("pause-btn");
+  window.systumSkillBtn = document.getElementById("systum-skill-btn");
+  window.systumSkillStatusEl = document.getElementById("systum-skill-status");
+  window.vandeSkillBtn = document.getElementById("vande-skill-btn");
+  window.vandeSkillStatusEl = document.getElementById("vande-skill-status");
+  window.pappuSkillBtn = document.getElementById("pappu-skill-btn");
+  window.pappuSkillStatusEl = document.getElementById("pappu-skill-status");
   window.resumeBtn = document.getElementById("resume-btn");
   window.pauseHomeBtn = document.getElementById("pause-home-btn");
   window.goHomeBtn = document.getElementById("go-home-btn");
@@ -555,10 +927,12 @@ window.init = async function() {
   window.settingsCloseBtn = document.getElementById("settings-close-btn");
   window.sfxVolumeInput = document.getElementById("sfx-volume");
   window.bgmVolumeInput = document.getElementById("bgm-volume");
+  window.randomSongsToggle = document.getElementById("random-songs-toggle");
 
   // Apply saved audio volume settings
   window.sfxVolumeInput.value = window.audioSettings.sfx;
   window.bgmVolumeInput.value = window.audioSettings.bgm;
+  window.randomSongsToggle.checked = window.audioSettings.randomSongs;
   window.applyAudioVolumes();
 
   window.resizeCanvas();
@@ -627,7 +1001,25 @@ window.init = async function() {
 
   // Event listeners
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.key === " ") window.onInputStart(e);
+    if (e.code === "Space" || e.key === " ") {
+      window.onInputStart(e);
+      return;
+    }
+    if (e.repeat || (e.target && e.target.closest && e.target.closest("input, textarea, select, [contenteditable='true']"))) return;
+    if (!window.gameScreen.classList.contains("active") || window.state !== "playing") return;
+    const skillActions = {
+      Digit1: window.activateSystumHack,
+      Numpad1: window.activateSystumHack,
+      Digit2: window.activateVandeBoost,
+      Numpad2: window.activateVandeBoost,
+      Digit3: window.activatePappuHamza,
+      Numpad3: window.activatePappuHamza,
+    };
+    const activateSkill = skillActions[e.code];
+    if (activateSkill) {
+      e.preventDefault();
+      activateSkill();
+    }
   });
   document.addEventListener("pointerdown", window.onInputStart, { passive: false });
   document.addEventListener("touchstart", window.onInputStart, { passive: false });
@@ -639,11 +1031,14 @@ window.init = async function() {
     window.pauseOverlay.classList.remove("hidden");
     window.audioBgm.pause();
   });
+  window.systumSkillBtn.addEventListener("click", window.activateSystumHack);
+  window.vandeSkillBtn.addEventListener("click", window.activateVandeBoost);
+  window.pappuSkillBtn.addEventListener("click", window.activatePappuHamza);
   window.resumeBtn.addEventListener("click", () => {
     window.playTap(); window.state = "playing";
     window.pauseOverlay.classList.add("hidden");
-    window.lastTime = performance.now();
     window.audioBgm.play().catch(() => {});
+    window.startGameLoop();
   });
   window.pauseHomeBtn.addEventListener("click", () => { window.playTap(); window.stopBgm(); window.goHome(); });
   window.goHomeBtn.addEventListener("click", () => { window.playTap(); window.goHome(); });
@@ -714,6 +1109,10 @@ window.init = async function() {
     window.saveAudioSettings();
     window.applyAudioVolumes();
   });
+  window.randomSongsToggle.addEventListener("change", () => {
+    window.audioSettings.randomSongs = window.randomSongsToggle.checked;
+    window.saveAudioSettings();
+  });
 
   window.spinBtn.addEventListener("click", window.spinRoulette);
   window.closeRouletteBtn.addEventListener("click", () => { window.playTap(); window.stopAnimationSound(); window.hideRoulette(); window.showScreen("store"); });
@@ -723,10 +1122,15 @@ window.init = async function() {
   const prizeCloseBtn = document.getElementById("prize-close-btn");
   if (prizeCloseBtn) {
     prizeCloseBtn.addEventListener("click", () => {
+      window.playTap();
       const notification = document.getElementById("prize-notification");
       if (notification) {
         notification.classList.add("hidden");
       }
+      window.stopAnimationSound();
+      window.hideRoulette();
+      window.renderStore();
+      window.showScreen("store");
     });
   }
 
@@ -749,6 +1153,7 @@ window.init = async function() {
   // Preload images
   window.VEHICLES.forEach(v => window.loadImage(v.img));
   window.loadImage("images/cockroach.png");
+  window.loadImage("images/attack.png");
   window.loadImage("images/meloni1.png");
   window.loadImage("images/meloni2.png");
   window.loadImage("images/meloni3.png");

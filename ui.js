@@ -4,6 +4,7 @@
 
 // DOM element references (global)
 window.homeBestScoreEl, window.homeCoinsEl, window.homeMelodiesEl, window.homeHitsEl;
+window.homeSystumChargesEl, window.homeVandeChargesEl, window.homePappuChargesEl;
 window.themeListEl, window.vehicleListEl, window.songListEl, window.storeListEl;
 
 // UI rendering functions (global)
@@ -12,6 +13,10 @@ window.renderPickers = function() {
   window.homeCoinsEl.textContent = save.coins;
   window.homeMelodiesEl.textContent = save.melodies;
   window.homeHitsEl.textContent = save.hits;
+  const skillCharges = save.skillCharges || {};
+  window.homeSystumChargesEl.textContent = skillCharges.systumHack || 0;
+  window.homeVandeChargesEl.textContent = skillCharges.vandeBoost || 0;
+  window.homePappuChargesEl.textContent = skillCharges.pappuHamza || 0;
 
   // Themes
   window.themeListEl.innerHTML = "";
@@ -62,7 +67,79 @@ window.renderPickers = function() {
 
 window.renderStore = function() {
   window.storeListEl.innerHTML = "";
-  
+
+  const renderProductCard = (item) => {
+    const isSkill = !!item.skillKey;
+    const isRoulettePack = !!item.rouletteMode;
+    const owned = !isSkill && !isRoulettePack && save.ownedStoreItems.includes(item.id);
+    const charges = isSkill ? (save.skillCharges[item.skillKey] || 0) : 0;
+    const balance = save[item.currency];
+    const description = item.skillKey === "systumHack"
+      ? "15 seconds: invulnerability and 2×/3× pipe coins and melody pickups"
+      : item.skillKey === "vandeBoost"
+        ? "10 seconds: 6s auto-float, then descend; tap to take control · 4×/3×/2× speed"
+        : item.skillKey === "pappuHamza"
+          ? "10 seconds: auto-fires at pipes and cockroaches, burning pests and clearing the path"
+        : isSkill
+          ? "Active game skill"
+          : isRoulettePack
+          ? "Spin for melodies and Systum, Vande, and Pappu skill charges"
+          : "Collectible store item";
+    const card = document.createElement("div");
+    card.className = "store-card";
+    card.innerHTML = `
+      <div class="store-card-icon"><img src="${item.image}" alt="${item.name}" /></div>
+      <div class="store-card-info">
+        <div class="store-card-name">${item.name}</div>
+        <div class="store-card-desc">${description}${isSkill ? ` · Charges: ${charges}` : ""}</div>
+      </div>
+      <button class="store-buy-btn" ${owned || balance < item.price ? "disabled" : ""}>
+        ${item.currency === "melodies"
+          ? '<img class="store-currency-icon" src="images/melody .png" alt="Melodies" />'
+          : '<span class="coin-dot"></span>'}
+        ${owned ? "Owned" : item.price}
+      </button>
+    `;
+
+    card.querySelector(".store-buy-btn").addEventListener("click", async () => {
+      if (!isSkill && save.ownedStoreItems.includes(item.id)) return;
+      if (save[item.currency] < item.price) {
+        window.flashInsufficientCoins();
+        return;
+      }
+
+      save[item.currency] -= item.price;
+      if (isRoulettePack) {
+        window.playPurchase();
+        await window.saveGameState();
+        window.renderPickers();
+        window.showRoulette(item.rouletteMode);
+        return;
+      }
+
+      if (isSkill) {
+        save.skillCharges[item.skillKey] = (save.skillCharges[item.skillKey] || 0) + 1;
+      } else {
+        save.ownedStoreItems.push(item.id);
+      }
+      window.playPurchase();
+      await window.saveGameState();
+      window.renderPickers();
+    });
+
+    window.storeListEl.appendChild(card);
+  };
+
+  const melodyStoreProducts = [];
+  const normalStoreProducts = [];
+  window.STORE_PRODUCTS.forEach(item => {
+    if (item.rouletteMode === "namo" || item.name.toLowerCase().includes("melody")) {
+      melodyStoreProducts.push(item);
+    } else {
+      normalStoreProducts.push(item);
+    }
+  });
+
   // Hit item
   const hitCard = document.createElement("div");
   hitCard.className = "store-card";
@@ -91,6 +168,8 @@ window.renderStore = function() {
   });
   window.storeListEl.appendChild(hitCard);
 
+  normalStoreProducts.forEach(renderProductCard);
+
   // Melody Pack item
   const packCard = document.createElement("div");
   packCard.className = "store-card";
@@ -118,6 +197,8 @@ window.renderStore = function() {
     }
   });
   window.storeListEl.appendChild(packCard);
+
+  melodyStoreProducts.forEach(renderProductCard);
 }
 
 window.renderSongs = function() {
@@ -202,7 +283,14 @@ window.showScreen = function(name) {
 }
 
 // Roulette functions (global)
-window.showRoulette = function() {
+window.rouletteMode = "melody";
+window.showRoulette = function(mode = "melody") {
+  window.rouletteMode = mode;
+  const isNamoRoulette = mode === "namo";
+  document.getElementById("roulette-title").textContent = isNamoRoulette ? "Melody NAMO Edition!" : "Melody Pack!";
+  document.getElementById("roulette-hint").textContent = isNamoRoulette
+    ? "Spin to win melodies and skill charges!"
+    : "Tap to spin and win melodies!";
   window.rouletteOverlay.classList.remove("hidden");
   window.spinBtn.disabled = false;
   window.spinBtn.textContent = "SPIN!";
@@ -220,6 +308,7 @@ window.hideRoulette = function() {
 
 window.buildRouletteTrack = function() {
   window.rouletteTrack.innerHTML = "";
+  const prizes = window.rouletteMode === "namo" ? NAMO_ROULETTE_PRIZES : ROULETTE_PRIZES;
   
   // Create a single horizontal row with prizes repeated for infinity scroll
   const rowEl = document.createElement("div");
@@ -228,7 +317,7 @@ window.buildRouletteTrack = function() {
   // Repeat prizes multiple times for smooth infinite scroll effect
   const repetitions = 10;
   for (let r = 0; r < repetitions; r++) {
-    ROULETTE_PRIZES.forEach(prize => {
+    prizes.forEach(prize => {
       const prizeEl = document.createElement("div");
       prizeEl.className = "roulette-prize";
       
@@ -249,6 +338,7 @@ window.buildRouletteTrack = function() {
 
 window.spinRoulette = function() {
   if (window.spinBtn.disabled) return;
+  const prizes = window.rouletteMode === "namo" ? NAMO_ROULETTE_PRIZES : ROULETTE_PRIZES;
   window.spinBtn.disabled = true;
   window.spinBtn.textContent = "Spinning...";
   window.spinBtn.style.display = "none";
@@ -256,8 +346,8 @@ window.spinRoulette = function() {
   // Determine winning prize
   const rand = Math.random();
   let cumulative = 0;
-  let winningPrize = ROULETTE_PRIZES[0];
-  for (const prize of ROULETTE_PRIZES) {
+  let winningPrize = prizes[0];
+  for (const prize of prizes) {
     cumulative += prize.chance;
     if (rand <= cumulative) {
       winningPrize = prize;
@@ -265,9 +355,9 @@ window.spinRoulette = function() {
     }
   }
 
-  const prizeIndex = ROULETTE_PRIZES.indexOf(winningPrize);
+  const prizeIndex = prizes.indexOf(winningPrize);
   const prizeWidth = 120; // Width of each prize card
-  const numPrizes = ROULETTE_PRIZES.length;
+  const numPrizes = prizes.length;
   const containerWidth = window.rouletteTrack.parentElement.offsetWidth;
   
   // Calculate center position (where the hand pointer is)
@@ -312,6 +402,11 @@ window.awardPrize = async function(prize) {
     save.melodies += prize.reward;
   } else if (prize.type === "coin") {
     save.coins += prize.reward;
+  } else if (prize.type === "bundle") {
+    save.melodies += prize.melodies;
+    Object.entries(prize.skills).forEach(([skillKey, amount]) => {
+      save.skillCharges[skillKey] = (save.skillCharges[skillKey] || 0) + amount;
+    });
   }
   await window.saveGameState();
   window.renderPickers();
@@ -322,11 +417,25 @@ window.awardPrize = async function(prize) {
     const rewardEl = document.getElementById("prize-reward");
     
     if (notification && rewardEl) {
+      rewardEl.classList.remove("bundle-reward");
       // Set reward text with icon
       if (prize.type === "melody") {
         rewardEl.innerHTML = `<img src="images/melody .png" alt="melody" />${prize.reward} Melodies`;
       } else if (prize.type === "coin") {
         rewardEl.innerHTML = `<img src="images/coin.png" alt="coin" />${prize.reward} Coins`;
+      } else if (prize.type === "bundle") {
+        const skillRewards = [
+          ["systumHack", "Systum Hack", "images/system hack.png"],
+          ["vandeBoost", "Vande Boost", "images/vande boost.png"],
+          ["pappuHamza", "Pappu Hamza", "images/pappu hamza.png"],
+        ];
+        rewardEl.classList.add("bundle-reward");
+        rewardEl.innerHTML = `
+          <div class="bundle-reward-row"><img src="images/melody .png" alt="" />${prize.melodies} Melodies</div>
+          ${skillRewards.map(([key, name, image]) =>
+            `<div class="bundle-reward-row"><img src="${image}" alt="" />${name} ×${prize.skills[key]}</div>`
+          ).join("")}
+        `;
       }
       
       // Show notification

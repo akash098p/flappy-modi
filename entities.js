@@ -77,7 +77,26 @@ window.spawnCoinBurst = function() {
   }
 }
 
-function drawCachedPipeSegment(pipe, drawSegment, theme, x, y, w, h, c1, c2, isTop) {
+window.spawnLotusRain = function() {
+  const count = 22;
+  for (let i = 0; i < count; i++) {
+    const size = rand(16, 24);
+    particles.push({
+      x: rand(0, W),
+      y: rand(0, H * 0.2),
+      vx: rand(-W * 0.025, W * 0.025),
+      vy: rand(H * 0.32, H * 0.42),
+      life: 3,
+      maxLife: 3,
+      size,
+      angle: rand(-0.3, 0.3),
+      rotationSpeed: rand(-1.3, 1.3),
+      color: "lotus",
+    });
+  }
+}
+
+function getCachedPipeSegment(pipe, drawSegment, theme, w, h, c1, c2, isTop) {
   const cacheKey = [theme, w, window.H, window.groundH, window.DPR, c1, c2].join("|");
   if (!pipe.renderCache || pipe.renderCache.key !== cacheKey) {
     pipe.renderCache = { key: cacheKey, top: null, bottom: null };
@@ -113,13 +132,12 @@ function drawCachedPipeSegment(pipe, drawSegment, theme, x, y, w, h, c1, c2, isT
     };
   }
 
-  window.ctx.drawImage(
-    sprite.canvas,
-    x - sprite.paddingX,
-    y - sprite.paddingY,
-    sprite.width,
-    sprite.spriteHeight
-  );
+  return sprite;
+}
+
+function drawCachedPipeSegment(pipe, drawSegment, theme, x, y, w, h, c1, c2, isTop) {
+  const sprite = getCachedPipeSegment(pipe, drawSegment, theme, w, h, c1, c2, isTop);
+  window.ctx.drawImage(sprite.canvas, x - sprite.paddingX, y - sprite.paddingY, sprite.width, sprite.spriteHeight);
 }
 
 // Drawing functions for entities (global)
@@ -146,8 +164,42 @@ window.drawPipes = function() {
               : isNight
                 ? drawNightPipeSegment
                 : drawPipeSegment;
-    drawCachedPipeSegment(p, drawSegment, theme, p.x, 0, PIPE_WIDTH, p.gapTop, c1, c2, true);
-    drawCachedPipeSegment(p, drawSegment, theme, p.x, p.gapBottom, PIPE_WIDTH, (H - groundH) - p.gapBottom, c1, c2, false);
+    if (!p.destruction) {
+      drawCachedPipeSegment(p, drawSegment, theme, p.x, 0, PIPE_WIDTH, p.gapTop, c1, c2, true);
+      drawCachedPipeSegment(p, drawSegment, theme, p.x, p.gapBottom, PIPE_WIDTH, (H - groundH) - p.gapBottom, c1, c2, false);
+      return;
+    }
+
+    const floorY = H - groundH;
+    const drawBrokenSegment = (y, h, isTop) => {
+      if (h <= 0) return;
+      const sprite = getCachedPipeSegment(p, drawSegment, theme, PIPE_WIDTH, h, c1, c2, isTop);
+      for (const piece of p.destruction.pieces) {
+        if (piece.isTop !== isTop || piece.sourceY >= h) continue;
+        const pieceHeight = Math.min(piece.sourceHeight, h - piece.sourceY);
+        const scale = window.DPR || 1;
+        const topPadding = piece.sourceY === 0 ? sprite.paddingY : 0;
+        const bottomPadding = piece.sourceY + piece.sourceHeight >= h
+          ? sprite.canvas.height / scale - (sprite.paddingY + h)
+          : 0;
+        const sourceY = (sprite.paddingY + piece.sourceY - topPadding) * scale;
+        const sourceHeight = (pieceHeight + topPadding + bottomPadding) * scale;
+        const drawWidth = sprite.width;
+        const drawHeight = pieceHeight + topPadding + bottomPadding;
+        const drawY = piece.y - topPadding;
+        ctx.save();
+        ctx.translate(piece.x + PIPE_WIDTH / 2, drawY + drawHeight / 2);
+        ctx.rotate(piece.rotation);
+        ctx.drawImage(
+          sprite.canvas,
+          0, sourceY, sprite.canvas.width, sourceHeight,
+          -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight
+        );
+        ctx.restore();
+      }
+    };
+    drawBrokenSegment(0, p.gapTop, true);
+    drawBrokenSegment(p.gapBottom, floorY - p.gapBottom, false);
   });
 }
 
@@ -848,9 +900,9 @@ function drawIndependencePipeSegment(x, y, w, h, c1, c2, isTop) {
     ctx.lineWidth = 1.6;
     ctx.beginPath();
     ctx.moveTo(left, bottom - height * 0.22);
-    ctx.quadraticCurveTo(left - 2, top + height * 0.12, left + extension * 0.5, top + height * 0.08);
+    ctx.quadraticCurveTo(left, top + height * 0.12, left + extension * 0.5, top + height * 0.08);
     ctx.lineTo(right - extension * 0.5, top + height * 0.08);
-    ctx.quadraticCurveTo(right + 2, top + height * 0.12, right, bottom - height * 0.22);
+    ctx.quadraticCurveTo(right, top + height * 0.12, right, bottom - height * 0.22);
     ctx.quadraticCurveTo(right, bottom, right - extension * 0.55, bottom);
     ctx.lineTo(left + extension * 0.55, bottom);
     ctx.quadraticCurveTo(left, bottom, left, bottom - height * 0.22);
@@ -910,10 +962,20 @@ function drawIndependencePipeSegment(x, y, w, h, c1, c2, isTop) {
 
   ctx.strokeStyle = "rgba(94, 60, 42, 0.76)";
   ctx.lineWidth = 2;
-  ctx.strokeRect(x + 2, shaftTop, w - 4, Math.max(0, shaftBottom - shaftTop));
+  ctx.beginPath();
+  ctx.moveTo(x + 2, shaftTop + 1);
+  ctx.lineTo(x + 2, shaftBottom - 1);
+  ctx.moveTo(x + w - 2, shaftTop + 1);
+  ctx.lineTo(x + w - 2, shaftBottom - 1);
+  ctx.stroke();
   ctx.strokeStyle = "rgba(255, 248, 229, 0.8)";
   ctx.lineWidth = 1;
-  ctx.strokeRect(x + 4, shaftTop + 2, w - 8, Math.max(0, shaftBottom - shaftTop - 4));
+  ctx.beginPath();
+  ctx.moveTo(x + 4, shaftTop + 3);
+  ctx.lineTo(x + 4, shaftBottom - 3);
+  ctx.moveTo(x + w - 4, shaftTop + 3);
+  ctx.lineTo(x + w - 4, shaftBottom - 3);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -1183,6 +1245,192 @@ window.drawCockroaches = function() {
   });
 }
 
+window.drawPappuEffects = function() {
+  const projectileImage = imageCache["images/attack.png"];
+  window.pappuProjectiles.forEach(projectile => {
+    ctx.save();
+    ctx.translate(projectile.x, projectile.y);
+    ctx.rotate(projectile.rotation);
+    ctx.shadowColor = "#ff7a18";
+    ctx.shadowBlur = 16;
+    if (projectileImage && projectileImage.complete && projectileImage.naturalWidth > 0) {
+      ctx.drawImage(projectileImage, -projectile.size / 2, -projectile.size / 2, projectile.size, projectile.size);
+    } else {
+      ctx.fillStyle = "#ff9d26";
+      ctx.beginPath();
+      ctx.moveTo(projectile.size * 0.55, 0);
+      ctx.lineTo(-projectile.size * 0.35, -projectile.size * 0.28);
+      ctx.lineTo(-projectile.size * 0.18, 0);
+      ctx.lineTo(-projectile.size * 0.35, projectile.size * 0.28);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+
+  window.cockroaches.forEach(cockroach => {
+    if (!cockroach.burning) return;
+    const progress = cockroach.burning.elapsed / window.GAME_CONFIG.PAPPU_HAMZA_COCKROACH_BURN_DURATION;
+    const cy = cockroach.y + Math.sin(cockroach.bob) * 8;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, 1 - progress);
+    ctx.translate(cockroach.x, cy);
+    ctx.shadowColor = "#ff4b12";
+    ctx.shadowBlur = 18;
+    for (let flame = 0; flame < 5; flame++) {
+      const x = (flame - 2) * cockroach.size * 0.17;
+      const flicker = Math.sin(window.elapsed * 24 + flame * 2) * 3;
+      ctx.fillStyle = flame % 2 ? "#ff741e" : "#ffd34e";
+      ctx.beginPath();
+      ctx.moveTo(x - 5, 9);
+      ctx.quadraticCurveTo(x - 9, -2 - flicker, x, -cockroach.size * 0.45 - flicker);
+      ctx.quadraticCurveTo(x + 10, -3, x + 5, 9);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+
+  window.pappuEffects.forEach(effect => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, effect.life / effect.maxLife);
+    ctx.fillStyle = "#ffb52e";
+    ctx.shadowColor = "#ff4b12";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(effect.x, effect.y, effect.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+window.drawHitShield = function() {
+  const bird = window.bird;
+  if (!bird) return;
+
+  const skillTimers = [window.systumHackTimer, window.vandeBoostTimer, window.pappuHamzaTimer].filter(timer => timer > 0);
+  const skillActive = skillTimers.length > 0;
+  const hitShieldActive = bird.shieldTimer > 0;
+  if (!skillActive && !hitShieldActive) return;
+
+  const warning = skillTimers.some(timer => timer <= 3);
+  const blinkVisible = !warning || Math.floor(window.elapsed * 8) % 2 === 0;
+  const fade = skillActive ? (blinkVisible ? 1 : 0.18) : Math.min(1, bird.shieldTimer / 0.3);
+  const pulse = 1 + Math.sin(window.elapsed * (skillActive ? 9 : 14)) * (skillActive ? 0.07 : 0.04);
+  const radius = bird.size * 0.48 * pulse;
+
+  ctx.save();
+  ctx.translate(bird.x, bird.y);
+  ctx.globalAlpha = fade;
+  if (skillActive) {
+    const shieldRadius = bird.size * 0.96 * pulse;
+    const shell = ctx.createRadialGradient(
+      -bird.size * 0.2, -bird.size * 0.28, bird.size * 0.08,
+      0, 0, shieldRadius * 1.2
+    );
+    shell.addColorStop(0, "rgba(255, 246, 220, 0.2)");
+    shell.addColorStop(0.58, "rgba(255, 168, 61, 0.1)");
+    shell.addColorStop(0.9, "rgba(255, 141, 38, 0.2)");
+    shell.addColorStop(1, "rgba(255, 141, 38, 0)");
+    ctx.fillStyle = shell;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, shieldRadius, shieldRadius * 1.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, -shieldRadius);
+    ctx.bezierCurveTo(shieldRadius * 0.7, -shieldRadius * 0.96, shieldRadius * 1.05, -shieldRadius * 0.48, shieldRadius, 0);
+    ctx.bezierCurveTo(shieldRadius * 0.96, shieldRadius * 0.62, shieldRadius * 0.4, shieldRadius * 1.05, 0, shieldRadius * 1.12);
+    ctx.bezierCurveTo(-shieldRadius * 0.4, shieldRadius * 1.05, -shieldRadius * 0.96, shieldRadius * 0.62, -shieldRadius, 0);
+    ctx.bezierCurveTo(-shieldRadius * 1.05, -shieldRadius * 0.48, -shieldRadius * 0.7, -shieldRadius * 0.96, 0, -shieldRadius);
+    ctx.closePath();
+    const edge = ctx.createLinearGradient(-shieldRadius, -shieldRadius, shieldRadius, shieldRadius);
+    edge.addColorStop(0, "rgba(255, 239, 191, 0.96)");
+    edge.addColorStop(0.48, "rgba(255, 153, 51, 0.86)");
+    edge.addColorStop(1, "rgba(255, 221, 158, 0.96)");
+    ctx.strokeStyle = edge;
+    ctx.lineWidth = 2.2;
+    ctx.shadowColor = "#ffae50";
+    ctx.shadowBlur = 18;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(255, 232, 183, 0.62)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, shieldRadius * 0.84, shieldRadius * 0.96, 0, -0.75, 0.75);
+    ctx.ellipse(0, 0, shieldRadius * 0.84, shieldRadius * 0.96, 0, Math.PI - 0.75, Math.PI + 0.75);
+    ctx.stroke();
+
+    for (let node = 0; node < 4; node++) {
+      const angle = window.elapsed * 0.8 + node * Math.PI / 2;
+      const nodeX = Math.cos(angle) * shieldRadius * 0.92;
+      const nodeY = Math.sin(angle) * shieldRadius * 1.02;
+      ctx.fillStyle = "rgba(255, 245, 215, 0.96)";
+      ctx.shadowColor = "#ff9d3b";
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(nodeX, nodeY, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    ctx.restore();
+    return;
+  }
+
+  const glow = ctx.createRadialGradient(0, 0, bird.size * 0.18, 0, 0, bird.size * 0.9 * pulse);
+  glow.addColorStop(0, "rgba(255, 153, 51, 0.02)");
+  glow.addColorStop(0.72, "rgba(255, 153, 51, 0.12)");
+  glow.addColorStop(1, "rgba(255, 153, 51, 0)");
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(0, 0, bird.size * 0.9 * pulse, 0, Math.PI * 2);
+  ctx.fill();
+
+  const drawPetalRing = (count, offset, length, width, opacity) => {
+    for (let petal = 0; petal < count; petal++) {
+      ctx.save();
+      ctx.rotate((petal + offset) * Math.PI * 2 / count);
+      ctx.translate(0, -radius);
+      const gradient = ctx.createLinearGradient(0, 0, 0, -length);
+      gradient.addColorStop(0, `rgba(255, 153, 51, ${opacity * 0.48})`);
+      gradient.addColorStop(0.55, `rgba(255, 174, 76, ${opacity})`);
+      gradient.addColorStop(1, `rgba(255, 211, 132, ${opacity * 0.82})`);
+      ctx.fillStyle = gradient;
+      ctx.strokeStyle = `rgba(255, 191, 105, ${opacity * 0.9})`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-width * 0.48, 0);
+      ctx.bezierCurveTo(-width * 0.66, -length * 0.4, -width * 0.28, -length * 0.88, 0, -length);
+      ctx.bezierCurveTo(width * 0.28, -length * 0.88, width * 0.66, -length * 0.4, width * 0.48, 0);
+      ctx.quadraticCurveTo(0, width * 0.18, -width * 0.48, 0);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = `rgba(255, 235, 195, ${opacity * 0.72})`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(0, -width * 0.04);
+      ctx.quadraticCurveTo(width * 0.04, -length * 0.48, 0, -length * 0.86);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
+  drawPetalRing(10, 0, bird.size * (skillActive ? 0.58 : 0.48) * pulse, bird.size * 0.28 * pulse, skillActive ? 0.68 : 0.38);
+  drawPetalRing(8, 0.5, bird.size * (skillActive ? 0.42 : 0.34) * pulse, bird.size * 0.2 * pulse, skillActive ? 0.76 : 0.52);
+
+  const centerGlow = ctx.createRadialGradient(0, 0, 1, 0, 0, bird.size * 0.3);
+  centerGlow.addColorStop(0, "rgba(255, 197, 112, 0.28)");
+  centerGlow.addColorStop(1, "rgba(255, 153, 51, 0)");
+  ctx.fillStyle = centerGlow;
+  ctx.beginPath();
+  ctx.arc(0, 0, bird.size * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
 window.drawMelons = function() {
   melons.forEach(m => {
     const img = imageCache[m.img];
@@ -1233,7 +1481,76 @@ window.drawParticles = function() {
   particles.forEach(p => {
     ctx.save();
     ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
-    if (p.color === "melody") {
+    if (p.color === "lotus") {
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.scale(p.size / 24, p.size / 24);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 1.2;
+
+      ctx.strokeStyle = "#286b37";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(0, 7);
+      ctx.quadraticCurveTo(0, 12, 0, 18);
+      ctx.moveTo(0, 13);
+      ctx.quadraticCurveTo(-5, 8, -11, 10);
+      ctx.quadraticCurveTo(-8, 15, 0, 15);
+      ctx.moveTo(0, 13);
+      ctx.quadraticCurveTo(5, 8, 11, 10);
+      ctx.quadraticCurveTo(8, 15, 0, 15);
+      ctx.stroke();
+      ctx.fillStyle = "#4a9b45";
+      ctx.beginPath();
+      ctx.moveTo(-1, 13);
+      ctx.quadraticCurveTo(-6, 8, -11, 10);
+      ctx.quadraticCurveTo(-8, 15, 0, 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(1, 13);
+      ctx.quadraticCurveTo(6, 8, 11, 10);
+      ctx.quadraticCurveTo(8, 15, 0, 15);
+      ctx.closePath();
+      ctx.fill();
+
+      const petals = [
+        { start: [-4, 8], controls: [[-13, 0], [-9, -14]], tip: [0, -22], end: [9, -14], close: [4, 8], color: "#f28a21" },
+        { start: [-3, 8], controls: [[-18, 5], [-21, -7]], tip: [-13, -17], end: [-5, -6], close: [0, 8], color: "#ffad43" },
+        { start: [3, 8], controls: [[18, 5], [21, -7]], tip: [13, -17], end: [5, -6], close: [0, 8], color: "#ffad43" },
+        { start: [-12, 8], controls: [[-23, 6], [-24, -2]], tip: [-19, -11], end: [-9, -3], close: [-6, 8], color: "#e97816" },
+        { start: [12, 8], controls: [[23, 6], [24, -2]], tip: [19, -11], end: [9, -3], close: [6, 8], color: "#e97816" },
+        { start: [-7, 8], controls: [[-12, 4], [-8, -3]], tip: [-4, -8], end: [0, -2], close: [0, 9], color: "#ffc15f" },
+        { start: [7, 8], controls: [[12, 4], [8, -3]], tip: [4, -8], end: [0, -2], close: [0, 9], color: "#ffc15f" },
+      ];
+      petals.forEach(petal => {
+        ctx.beginPath();
+        ctx.moveTo(...petal.start);
+        ctx.bezierCurveTo(...petal.controls[0], ...petal.controls[1], ...petal.tip);
+        ctx.bezierCurveTo(...petal.controls[1], ...petal.controls[0], ...petal.end);
+        ctx.quadraticCurveTo(...petal.close, ...petal.start);
+        ctx.closePath();
+        ctx.fillStyle = petal.color;
+        ctx.strokeStyle = "rgba(130, 58, 13, 0.95)";
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      ctx.strokeStyle = "rgba(255, 232, 190, 0.95)";
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(0, 7);
+      ctx.quadraticCurveTo(-1, -6, 0, -19);
+      ctx.moveTo(-9, 5);
+      ctx.quadraticCurveTo(-14, -2, -19, -9);
+      ctx.moveTo(9, 5);
+      ctx.quadraticCurveTo(14, -2, 19, -9);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    } else if (p.color === "melody") {
       ctx.fillStyle = "#7fefff";
       ctx.strokeStyle = "#0a5d7d";
     } else {

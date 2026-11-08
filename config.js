@@ -18,8 +18,9 @@ window.VEHICLES = [
   { id: "flappy1", name: "Wing", cost: 0,   img: "images/flappy1.png" },
   { id: "flappy2", name: "Helicopter",  cost: 15,  img: "images/flappy2.png" },
   { id: "flappy3", name: "Car",    cost: 30, img: "images/flappy3.png" },
-  { id: "flappy4", name: "Scooty",    cost: 45, img: "images/flappy4.png" },
-  { id: "flappy5", name: "Tejas",    cost: 60, img: "images/flappy5.png" },
+  { id: "flappy4", name: "Scooty",    cost: 40, img: "images/flappy4.png" },
+  { id: "flappy5", name: "Plane",    cost: 50, img: "images/flappy5.png" },
+  { id: "flappy6", name: "Tejas",    cost: 60, img: "images/flappy6.png" },
 ];
 
 // Song definitions - just add new song objects here
@@ -55,6 +56,22 @@ window.GAME_CONFIG = {
   MELODY_SIZE: 40,
   MELODY_SPEED: 150,
   COINS_PER_POINT: 1,
+  SYSTUM_HACK_DURATION: 15,
+  VANDE_BOOST_DURATION: 10,
+  VANDE_BOOST_FLOAT_DURATION: 6,
+  VANDE_BOOST_SPEED_PHASES: [
+    { duration: 5, multiplier: 4 },
+    { duration: 3, multiplier: 3 },
+    { duration: 2, multiplier: 2 },
+  ],
+  PAPPU_HAMZA_DURATION: 10,
+  PAPPU_HAMZA_FIRE_INTERVAL: 0.32,
+  PAPPU_HAMZA_PROJECTILE_SPEED: 680,
+  PAPPU_HAMZA_PROJECTILE_SIZE: 40,
+  PAPPU_HAMZA_PIPE_FALL_DURATION: 1.5,
+  PAPPU_HAMZA_COCKROACH_BURN_DURATION: 0.8,
+  VANDE_BOOST_PIPES_MIN: 5,
+  VANDE_BOOST_PIPES_MAX: 8,
 };
 
 // Store items
@@ -63,14 +80,29 @@ window.STORE_ITEMS = {
   MELODY_PACK_COST: 50,
 };
 
+window.STORE_PRODUCTS = [
+  { id: "systum-hack", name: "Systum Hack", image: "images/system hack.png", price: 5, currency: "melodies", skillKey: "systumHack" },
+  { id: "vande-boost", name: "Vande Boost", image: "images/vande boost.png", price: 10, currency: "melodies", skillKey: "vandeBoost" },
+  { id: "pappu-hamza", name: "Pappu Hamza", image: "images/pappu hamza.png", price: 15, currency: "melodies", skillKey: "pappuHamza" },
+  { id: "melody-namo-edition", name: "Melody NAMO Edition", image: "images/melody pack namo edition.png", price: 100, currency: "coins", rouletteMode: "namo" },
+];
+
 // Roulette prizes
 window.ROULETTE_PRIZES = [
-  { id: 1, label: "2 Melodies",  icon: "images/melody .png", reward: 2,  type: "melody", chance: 0.34 },
-  { id: 2, label: "4 Melodies",  icon: "images/melody .png", reward: 4,  type: "melody", chance: 0.19 },
-  { id: 3, label: "5 Melodies",  icon: "images/melody .png", reward: 5,  type: "melody", chance: 0.14 },
-  { id: 4, label: "20 Coins",    icon: "images/coin.png",    reward: 20, type: "coin",   chance: 0.20 },
-  { id: 5, label: "10 Melodies", icon: "images/melody .png", reward: 10, type: "melody", chance: 0.08 },
-  { id: 6, label: "15 Melodies", icon: "images/melody .png", reward: 15, type: "melody", chance: 0.05 },
+  { id: 1, label: "3 Melodies",  icon: "images/melody .png", reward: 3,  type: "melody", chance: 0.34 },
+  { id: 2, label: "5 Melodies",  icon: "images/melody .png", reward: 5,  type: "melody", chance: 0.19 },
+  { id: 3, label: "7 Melodies",  icon: "images/melody .png", reward: 7,  type: "melody", chance: 0.14 },
+  { id: 4, label: "10 Melodies", icon: "images/melody .png", reward: 10, type: "melody", chance: 0.20 },
+  { id: 5, label: "15 Melodies", icon: "images/melody .png", reward: 15, type: "melody", chance: 0.08 },
+  { id: 6, label: "20 Melodies", icon: "images/melody .png", reward: 20, type: "melody", chance: 0.05 },
+];
+
+window.NAMO_ROULETTE_PRIZES = [
+  { id: 1, label: "5 Melodies + 1 Each Skill", icon: "images/melody new1.png", type: "bundle", melodies: 5, skills: { systumHack: 1, vandeBoost: 1, pappuHamza: 1 }, chance: 0.2 },
+  { id: 2, label: "10 Melodies + 2/2/1 Skills", icon: "images/melody new2.png", type: "bundle", melodies: 10, skills: { systumHack: 2, vandeBoost: 2, pappuHamza: 1 }, chance: 0.2 },
+  { id: 3, label: "10 Melodies + 4/3/2 Skills", icon: "images/melody new1.png", type: "bundle", melodies: 10, skills: { systumHack: 4, vandeBoost: 3, pappuHamza: 2 }, chance: 0.2 },
+  { id: 4, label: "15 Melodies + 5/4/3 Skills", icon: "images/melody new2.png", type: "bundle", melodies: 15, skills: { systumHack: 5, vandeBoost: 4, pappuHamza: 3 }, chance: 0.2 },
+  { id: 5, label: "15 Melodies + 5 Each Skill", icon: "images/melody pack namo edition.png", type: "bundle", melodies: 15, skills: { systumHack: 5, vandeBoost: 5, pappuHamza: 5 }, chance: 0.2 },
 ];
 
 // Default save data
@@ -80,6 +112,8 @@ window.getDefaultSave = function() {
     coins: 0,
     melodies: 0,
     hits: 2,
+    ownedStoreItems: [],
+    skillCharges: { systumHack: 1, vandeBoost: 1, pappuHamza: 1 },
     unlockedThemes: ["day"],
     unlockedVehicles: ["flappy1"],
     selectedTheme: "day",
@@ -174,6 +208,22 @@ window.getGameValue = async function(key, defaultValue) {
 // Async function to load all saved player data
 window.loadSavedPlayerData = async function() {
   const defaultData = window.getDefaultSave();
+  let ownedStoreItems = await window.getGameValue("ownedStoreItems", defaultData.ownedStoreItems);
+  const savedSkillCharges = await window.getGameValue("skillCharges", null);
+  let skillCharges = savedSkillCharges && typeof savedSkillCharges === "object"
+    ? { ...defaultData.skillCharges, ...savedSkillCharges }
+    : { ...defaultData.skillCharges };
+
+  if (savedSkillCharges === null) {
+    window.STORE_PRODUCTS.forEach(item => {
+      if (item.skillKey && ownedStoreItems.includes(item.id)) {
+        skillCharges[item.skillKey] = Math.max(1, skillCharges[item.skillKey] || 0);
+      }
+    });
+    ownedStoreItems = ownedStoreItems.filter(id =>
+      !window.STORE_PRODUCTS.some(item => item.id === id && item.skillKey)
+    );
+  }
   
   // Load each value with defaults
   window.save = {
@@ -181,6 +231,8 @@ window.loadSavedPlayerData = async function() {
     coins: await window.getGameValue("coins", defaultData.coins),
     melodies: await window.getGameValue("melodies", defaultData.melodies),
     hits: await window.getGameValue("hits", defaultData.hits),
+    ownedStoreItems,
+    skillCharges,
     unlockedThemes: await window.getGameValue("unlockedThemes", defaultData.unlockedThemes),
     unlockedVehicles: await window.getGameValue("unlockedVehicles", defaultData.unlockedVehicles),
     selectedTheme: await window.getGameValue("selectedTheme", defaultData.selectedTheme),
@@ -199,6 +251,8 @@ window.saveAllGameData = async function() {
   await window.setGameValue("coins", window.save.coins);
   await window.setGameValue("melodies", window.save.melodies);
   await window.setGameValue("hits", window.save.hits);
+  await window.setGameValue("ownedStoreItems", window.save.ownedStoreItems);
+  await window.setGameValue("skillCharges", window.save.skillCharges);
   await window.setGameValue("unlockedThemes", window.save.unlockedThemes);
   await window.setGameValue("unlockedVehicles", window.save.unlockedVehicles);
   await window.setGameValue("selectedTheme", window.save.selectedTheme);
