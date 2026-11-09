@@ -1,6 +1,6 @@
 # Flappy Modi
 
-A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, with custom vehicles, unlockable themes, background soundtracks, a shield protection system, and persistent local progression. Built with vanilla JavaScript and HTML5 Canvas for smooth browser gameplay.
+A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula. Fly through pipe gaps, avoid cockroaches and the ground, collect melodies, and use three timed skills. Unlock vehicles and themes, choose a soundtrack, and save your progression. Built with vanilla JavaScript and HTML5 Canvas.
 
 <p align="center">
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
@@ -57,26 +57,27 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 
 ## 🎮 Features
 
-- **Custom Vehicles**: Unlock and switch between different flying vehicles with unique styles and progression-based upgrades
-- **Unlockable Themes**: Explore multiple visual themes including Day, Night, Desert, Ocean, and festive variations
-- **Background Soundtracks**: Enjoy a curated playlist of Indian-inspired tracks while you play
-- **Shield Protection System**: Buy and use a shield to protect yourself from a collision and stay in the run
-- **Melody Collection**: Gather rare melodies and bonus items during gameplay for extra rewards
-- **Roulette Rewards**: Spin for coin and melody prizes with the in-game reward system
+- **Custom Vehicles**: Select from six flying vehicles, including Wing, Helicopter, Car, Scooty, Plane, and Tejas
+- **Unlockable Themes**: Play with Day, Night, Desert, Ocean, Diwali, or Independence Day visuals
+- **Background Soundtracks**: Preview and select from nine songs, or shuffle the playlist in Settings
+- **Timed Skills**: Activate Systum Hack, Vande Boost, and Pappu Hamza during a run
+- **Melody Collection**: Collect melodies to buy skill charges or respawn after a collision
+- **Roulette Rewards**: Spin Melody Pack or Melody NAMO Edition for melody and skill-charge rewards
+- **In-Game Store**: Buy hits and Melody Packs with coins, skills with melodies, and NAMO Edition with coins
 - **Responsive Mobile Design**: Built for touch-friendly gameplay on phones, tablets, and desktop browsers
-- **Persistent Progression**: Local storage saves coins, melodies, unlocked content, and long-term progression across sessions
+- **Persistent Progression**: Save scores, coins, melodies, hits, skill charges, selected content, and unlocked items across sessions
 
 ---
 
 ## 🎯 Gameplay
 
 - **Tap or Press Space** to flap and navigate through pipes
-- **Avoid pipes and cockroaches** while using your movement skills to survive longer
-- **Collect melodies** to gain bonus rewards and power up your progression
-- **Earn coins** based on your score and successful runs
-- **Use shield protection** strategically to avoid losing the run after a collision
-- **Unlock vehicles and themes** using the in-game economy and save system
-- **Choose your soundtrack** and personalize the experience while you play
+- **Avoid pipes, cockroaches, and the ground**; passing a pipe gap adds to your score
+- **Collect melodies** during a run to keep them or spend them to respawn after a collision
+- **Earn coins** from your score, with additional milestone bonuses every 50 points
+- **Use skills** to protect yourself, gain a temporary speed boost, or automatically clear obstacles
+- **Buy hits** to absorb one cockroach collision; hits do not protect against pipes or the ground
+- **Unlock vehicles and themes** with coins, then choose a song or shuffled playlist
 
 ---
 
@@ -100,11 +101,12 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 
 | Vehicle | Cost | Description |
 |---------|------|-------------|
-| 🪽 Wing | Free | Classic Flappy Bird style |
-| 🚁 Helicopter | 15 Coins | Rotor-based flying machine |
-| 🚗 Car | 30 Coins | Compact road vehicle adapted for flying |
-| 🛵 Scooty | 45 Coins | Stylish Indian scooter turned flying vehicle |
-| ✈️ Tejas | 60 Coins | Advanced jet aircraft |
+| 🪽 Wing | Free | Starting vehicle |
+| 🚁 Helicopter | 15 Coins | Helicopter vehicle |
+| 🚗 Car | 30 Coins | Flying car |
+| 🛵 Scooty | 40 Coins | Flying scooter |
+| ✈️ Plane | 50 Coins | Plane vehicle |
+| 🛩️ Tejas | 60 Coins | Tejas aircraft |
 
 
 ---
@@ -126,8 +128,16 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 ## 🛒 Store Items
 
 - **1 Hit** - 5 Coins: Protects from one cockroach collision
-- **Shield Upgrade** - Game protection item for safer runs
-- **Melody Pack** - 50 Coins: Spin the roulette to win 2-15 melodies or 20 coins
+- **Melody Pack** - 50 Coins: Spin for 3, 5, 7, 10, 15, or 20 melodies
+- **Melody NAMO Edition** - 100 Coins: Spin for a bundle of melodies and skill charges
+
+### Skills
+
+| Skill | Charge Cost | Duration | Effect |
+|-------|-------------|----------|--------|
+| **Systum Hack** | 5 Melodies | 15 seconds | Protects from pipes and cockroaches; boosts pipe and melody coin rewards. Flight remains manual. |
+| **Vande Boost** | 10 Melodies | 10 seconds | Auto-floats for 6 seconds, then returns control during descent; speed phases are 4× for 5s, 3× for 3s, and 2× for 2s. |
+| **Pappu Hamza** | 15 Melodies | 10 seconds | Automatically fires at pipes and cockroaches; the ground remains dangerous. |
 
 ---
 
@@ -136,12 +146,24 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula, 
 
 | Prize | Chance |
 |-------|--------|
-| 🍬 2 Melodies | 34% |
-| 🍬 4 Melodies | 19% |
-| 🍬 5 Melodies | 14% |
-| 🪙 20 Coins | 20% |
-| 🍬 10 Melodies | 8% |
-| 🍬 15 Melodies | 5% |
+| 🍬 3 Melodies | 34% |
+| 🍬 5 Melodies | 19% |
+| 🍬 7 Melodies | 14% |
+| 🍬 10 Melodies | 20% |
+| 🍬 15 Melodies | 8% |
+| 🍬 20 Melodies | 5% |
+
+Melody NAMO Edition prizes combine melodies with Systum Hack, Vande Boost, and Pappu Hamza charges.
+
+### Melody NAMO Edition Roulette
+
+| Prize | Chance |
+|-------|--------|
+| 🍬 5 Melodies + 1 Systum Hack, 1 Vande Boost, 1 Pappu Hamza | 20% |
+| 🍬 10 Melodies + 2 Systum Hack, 2 Vande Boost, 1 Pappu Hamza | 20% |
+| 🍬 10 Melodies + 4 Systum Hack, 3 Vande Boost, 2 Pappu Hamza | 20% |
+| 🍬 15 Melodies + 5 Systum Hack, 4 Vande Boost, 3 Pappu Hamza | 20% |
+| 🍬 15 Melodies + 5 of each skill | 20% |
 
 
 ---
@@ -183,20 +205,21 @@ The game is optimized for mobile devices with:
 - Touch controls (tap to flap)
 - Responsive layout that adapts to screen size
 - Safe area support for notched devices
-- Smooth 60fps gameplay
+- Animation-frame-based gameplay
 
 ## 🎮 Controls
 
-- **Desktop**: Spacebar or mouse click
-- **Mobile**: Tap anywhere on screen
-- **Pause**: Click the pause button (II)
+- **Flap**: Press Space or click/tap the game
+- **Activate skills**: Press **1** for Systum Hack, **2** for Vande Boost, or **3** for Pappu Hamza; skill buttons are also available in the game HUD
+- **Pause**: Use the pause button (II)
+- **Mobile**: Tap to flap and use the on-screen skill and pause buttons
 
 ## 🛠️ Built With
 
 - **HTML5 Canvas** - Rendering engine
 - **Vanilla JavaScript** - Game logic and state management
 - **CSS3** - UI styling and animations
-- **Local Storage** - Progress persistence
+- **Capacitor Preferences / Local Storage** - Progress persistence, with a browser-storage fallback
 - **Web Audio API** - Sound effects and music
 
 ## 📊 Game Mechanics
@@ -204,15 +227,18 @@ The game is optimized for mobile devices with:
 - **Gravity**: 1500 px/s²
 - **Flap Velocity**: -430 px/s
 - **Pipe Gap**: 190px
-- **Pipe Speed**: 165 px/s (increases with score)
+- **Pipe Speed**: Starts at 165 px/s and increases with score
 - **Cockroach Spawn**: Every 5-8 seconds
-- **Melody Spawn**: Every 12-22 seconds
+- **Melon Spawn**: Every 4.5-8 seconds
+- **Melody Spawn**: Every 10-22 seconds
+- **Skill Durations**: Systum Hack 15 seconds; Vande Boost and Pappu Hamza 10 seconds each
 
 ## 🎯 Scoring
 
-- **+1 Coin** for each point scored
-- **Melodies** collected during gameplay
-- **Best Score** saved permanently
+- **Score**: +1 for each pipe gap passed
+- **Coins**: Earned from score, with milestone bonuses every 50 points
+- **Melodies**: Collected during gameplay and saved to your balance
+- **Best Score**: Saved with your progression
 
 ## 🔧 Development
 
@@ -221,30 +247,26 @@ The game is optimized for mobile devices with:
 ```
 flappy-modi/
 ├── index.html          # Main HTML file
-├── style.css           # All styling and animations
-├── script.js           # Game engine and logic
+├── style.css           # Styling, responsive layout, and animations
+├── config.js           # Game configuration, themes, vehicles, songs, and storage
+├── main.js             # Game loop, controls, gameplay, and state
+├── entities.js         # Game entities and collision helpers
+├── decorations.js      # Background and scene decorations
+├── ui.js               # Menus, store, pickers, and roulette
+├── audio.js            # Music and sound playback
 ├── audio/              # Sound effects and music
-│   ├── jump.mp3
-│   ├── gameover.mp3
-│   ├── melody.mp3
-│   └── ...
 ├── images/             # Game sprites and icons
-│   ├── flappy1.png
-│   ├── flappy2.png
-│   ├── flappy3.png
-│   ├── cockroach.png
-│   └── ...
 └── README.md
 ```
 
 ### Key Features Implementation
 
-- **Game Loop**: RequestAnimationFrame for smooth 60fps
-- **Collision Detection**: Circle-rect and circle-circle collision
-- **Particle System**: Coin bursts and melody sparkles
-- **State Management**: Ready, playing, paused, gameover, respawning
-- **Audio System**: Layered audio with volume control
-- **Save System**: JSON-based local storage
+- **Game Loop**: Animation-frame-based updates and rendering
+- **Collision Detection**: Collision checks for pipes, collectibles, and hazards
+- **Skills**: Timed protection, boost phases, and automatic projectiles
+- **State Management**: Ready, playing, paused, respawning, and game-over states
+- **Audio System**: Music previews, playlist options, and separate music and sound-effect volume controls
+- **Save System**: Persistent game progress through Capacitor Preferences or browser local storage
 
 ## 🎨 Design Philosophy
 
