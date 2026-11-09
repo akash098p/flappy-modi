@@ -15,14 +15,11 @@ A mobile-responsive 2D arcade game inspired by the classic Flappy Bird formula. 
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/93b3a8eb-3b28-4368-9550-e624b4e19f88" width="49.5%">
-  <img src="https://github.com/user-attachments/assets/fa14063d-8593-4a6c-826e-c22664a6c1cf" width="48.5%">
+  <img src="https://github.com/user-attachments/assets/c7390e33-d4dd-4d5e-ae74-2e816a738ee4" width="98%">
 <br>
-  <img src="https://github.com/user-attachments/assets/b1328831-5a73-45c8-9565-4e71f5095739" width="48.5%">
-  <img src="https://github.com/user-attachments/assets/35d39a2a-de10-4d43-8c3e-22fe99fb9baf" width="49.5%">
+  <img src="https://github.com/user-attachments/assets/4e4939fe-62c2-44b7-87f9-a5fee5e66329" width="98%">
 <br>
-  <img src="https://github.com/user-attachments/assets/89ef817f-d6b4-4b23-b89d-8b6504fc8aac" width="52.1%">
-  <img src="https://github.com/user-attachments/assets/e8e9d48d-5741-42d5-926a-7ec298d1e369" width="45.9%">
+  <img src="https://github.com/user-attachments/assets/f3f8d542-e370-4610-ae07-28a5c3863d35" width="98%">
 </p>
 
 ---
