@@ -33,7 +33,7 @@ window.renderPickers = function() {
         <div class="scene-art" aria-hidden="true">${previewObjects.map(object => `<span class="scene-object ${object}"></span>`).join("")}</div>
       </div>
       <div class="pick-name">${t.name}</div>
-      ${owned ? "" : `<div class="pick-cost"><span class="coin-dot"></span>${t.cost}</div>`}
+      ${owned ? "" : `<div class="pick-cost"><img class="coin-icon" src="images/coin.png" alt="" />${t.cost}</div>`}
     `;
     card.addEventListener("click", () => window.selectOrUnlock("theme", t));
     window.themeListEl.appendChild(card);
@@ -53,7 +53,7 @@ window.renderPickers = function() {
         <img src="${v.img}" alt="${v.name}" />
       </div>
       <div class="pick-name">${v.name}</div>
-      ${owned ? "" : `<div class="pick-cost"><span class="coin-dot"></span>${v.cost}</div>`}
+      ${owned ? "" : `<div class="pick-cost"><img class="coin-icon" src="images/coin.png" alt="" />${v.cost}</div>`}
     `;
     card.addEventListener("click", () => window.selectOrUnlock("vehicle", v));
     window.vehicleListEl.appendChild(card);
@@ -96,7 +96,7 @@ window.renderStore = function() {
       <button class="store-buy-btn" ${owned || balance < item.price ? "disabled" : ""}>
         ${item.currency === "melodies"
           ? '<img class="store-currency-icon" src="images/melody .png" alt="Melodies" />'
-          : '<span class="coin-dot"></span>'}
+          : '<img class="store-currency-icon" src="images/coin.png" alt="Coins" />'}
         ${owned ? "Owned" : item.price}
       </button>
     `;
@@ -151,7 +151,7 @@ window.renderStore = function() {
       <div class="store-card-desc">Protects from cockroach collision. You have: ${save.hits}</div>
     </div>
     <button class="store-buy-btn" ${canAffordHit ? "" : "disabled"}>
-      <span class="coin-dot"></span>${HIT_COST}
+      <img class="store-currency-icon" src="images/coin.png" alt="Coins" />${HIT_COST}
     </button>
   `;
   const hitBuyBtn = hitCard.querySelector(".store-buy-btn");
@@ -181,7 +181,7 @@ window.renderStore = function() {
       <div class="store-card-desc">Spin the roulette and win melodies!</div>
     </div>
     <button class="store-buy-btn" ${canAffordPack ? "" : "disabled"}>
-      <span class="coin-dot"></span>${MELODY_PACK_COST}
+      <img class="store-currency-icon" src="images/coin.png" alt="Coins" />${MELODY_PACK_COST}
     </button>
   `;
   const packBuyBtn = packCard.querySelector(".store-buy-btn");
