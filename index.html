@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <link rel="icon" type="image/png" href="images/logo.png" />
 <title>Flappy Modi</title>
-<link rel="stylesheet" href="style.css?v=20261109-skill-timers" />
+<link rel="stylesheet" href="style.css?v=20261111-skill-radial-countdown" />
 </head>
 <body>
 
@@ -76,11 +76,11 @@
         <div class="stats-row">
           <div class="stat-card">
             <span class="stat-label">Best Score</span>
-            <span class="stat-value" id="home-best-score">0</span>
+            <span class="stat-value home-score-value"><img class="home-score-icon" src="images/top score.png" alt="" /><span id="home-best-score">0</span></span>
           </div>
           <div class="stat-card">
             <span class="stat-label">Coins</span>
-            <span class="stat-value coin-value"><span class="coin-dot"></span><span id="home-coins">0</span></span>
+            <span class="stat-value coin-value"><img class="coin-icon" src="images/coin.png" alt="" /><span id="home-coins">0</span></span>
           </div>
           <div class="stat-card">
             <span class="stat-label">Melodies</span>
@@ -167,8 +167,8 @@
       <div class="info-list">
         <div class="info-item"><span class="info-num">1</span><p><strong>Flap and steer</strong> — Tap/click or press <kbd>Space</kbd> to fly. Avoid pipes, cockroaches, and the ground.</p></div>
         <div class="info-item"><span class="info-num">2</span><p><strong>Score and collect</strong> — Pass pipe gaps for points and coins; collect melodies to respawn after a crash. A hit can save you from one cockroach collision.</p></div>
-        <div class="info-item"><span class="info-num">3</span><p><strong>Systum Hack · press 1</strong> — Lasts 15 seconds. Protects from pipes and cockroaches and doubles or triples pipe and melody coin rewards. Flight remains manual.</p></div>
-        <div class="info-item"><span class="info-num">4</span><p><strong>Vande Boost · press 2</strong> — Lasts 10 seconds with 4×/3×/2× speed phases. Auto-floats for 6 seconds; tap or press <kbd>Space</kbd> to steer, then take manual control during the descent.</p></div>
+        <div class="info-item"><span class="info-num">3</span><p><strong>Systum Hack · press 1</strong> — Lasts 15 seconds. Gives 2× or 3× points, coin earnings, and melodies. Protects from pipes and fries cockroaches on contact; flight remains manual.</p></div>
+        <div class="info-item"><span class="info-num">4</span><p><strong>Vande Boost · press 2</strong> — Lasts 10 seconds with 4×/3×/2× speed phases. Auto-floats for 6 seconds; tap or press <kbd>Space</kbd> to steer, then take manual control during the descent. Fries cockroaches on contact.</p></div>
         <div class="info-item"><span class="info-num">5</span><p><strong>Pappu Hamza · press 3</strong> — Lasts 10 seconds and automatically shoots at pipes and cockroaches. Pipes fall away and cockroaches burn; the ground is still dangerous.</p></div>
         <div class="info-item"><span class="info-num">6</span><p><strong>Get more skill charges</strong> — Buy Systum Hack, Vande Boost, and Pappu Hamza in the Store with melodies, or win them in Melody NAMO Edition.</p></div>
         <div class="info-item"><span class="info-num">7</span><p><strong>Customize your run</strong> — Unlock themes and vehicles with coins, select game songs, and choose repeated or shuffled music in Settings.</p></div>
@@ -304,7 +304,7 @@
           </div>
           <div class="go-stat">
             <span class="go-label">Coins earned</span>
-            <span class="go-value coin-value"><span class="coin-dot"></span><span id="go-coins">0</span></span>
+            <span class="go-value coin-value"><img class="coin-icon" src="images/coin.png" alt="" /><span id="go-coins">0</span></span>
           </div>
           <div class="go-stat">
             <span class="go-label">Melodies</span>
@@ -350,7 +350,7 @@
   <script src="audio.js?v=20261108-pappu-pipe-pieces"></script>
   <script src="entities.js?v=20261108-pappu-pipe-pieces"></script>
   <script src="decorations.js"></script>
-  <script src="ui.js?v=20261108-home-settings"></script>
-  <script src="main.js?v=20261109-desktop-bird-size"></script>
+  <script src="ui.js?v=20261111-coin-icons-everywhere"></script>
+  <script src="main.js?v=20261111-systum-multiplier"></script>
 </body>
 </html>

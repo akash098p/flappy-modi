@@ -22,7 +22,6 @@ window.respawnTimerId = null;
 window.respawnTimeLeft = 5;
 window.systumHackTimer = 0;
 window.systumHackMultiplier = 1;
-window.systumBonusCoins = 0;
 window.vandeBoostTimer = 0;
 window.vandePipesRemaining = 0;
 window.vandeBoostFloatY = 0;
@@ -347,14 +346,16 @@ window.updateSkillButtons = function() {
   const systumActive = window.systumHackTimer > 0;
   const vandeActive = window.vandeBoostTimer > 0;
   const pappuActive = window.pappuHamzaTimer > 0;
-  const updateTimer = (button, timerElement, remaining) => {
+  const updateTimer = (button, timerElement, remaining, duration) => {
     const timerText = remaining > 0 ? `${Math.ceil(remaining)}s` : "";
     if (timerElement.textContent !== timerText) timerElement.textContent = timerText;
     button.classList.toggle("active", remaining > 0);
+    const sweepAngle = duration > 0 ? Math.max(0, Math.min(1, remaining / duration)) * 360 : 0;
+    button.style.setProperty("--skill-sweep-angle", `${sweepAngle}deg`);
   };
-  updateTimer(window.systumSkillBtn, window.systumSkillTimerEl, window.systumHackTimer);
-  updateTimer(window.vandeSkillBtn, window.vandeSkillTimerEl, window.vandeBoostTimer);
-  updateTimer(window.pappuSkillBtn, window.pappuSkillTimerEl, window.pappuHamzaTimer);
+  updateTimer(window.systumSkillBtn, window.systumSkillTimerEl, window.systumHackTimer, window.GAME_CONFIG.SYSTUM_HACK_DURATION);
+  updateTimer(window.vandeSkillBtn, window.vandeSkillTimerEl, window.vandeBoostTimer, window.GAME_CONFIG.VANDE_BOOST_DURATION);
+  updateTimer(window.pappuSkillBtn, window.pappuSkillTimerEl, window.pappuHamzaTimer, window.GAME_CONFIG.PAPPU_HAMZA_DURATION);
   const systumDisabled = window.state !== "playing" || (!systumActive && !(charges.systumHack > 0));
   const vandeDisabled = window.state !== "playing" || (!vandeActive && !(charges.vandeBoost > 0));
   const pappuDisabled = window.state !== "playing" || (!pappuActive && !(charges.pappuHamza > 0));
@@ -414,7 +415,7 @@ window.startNewGame = function() {
   window.melonTimer = window.rand(window.MELON_INTERVAL_MIN, window.MELON_INTERVAL_MAX);
   window.melodyTimer = window.rand(window.MELODY_INTERVAL_MIN, window.MELODY_INTERVAL_MAX);
   window.melodiesThisRun = 0; window.respawnCount = 0; window.groundOffset = 0;
-  window.systumHackTimer = 0; window.systumHackMultiplier = 1; window.systumBonusCoins = 0;
+  window.systumHackTimer = 0; window.systumHackMultiplier = 1;
   window.vandeBoostTimer = 0; window.vandePipesRemaining = 0;
   window.vandeBoostFloatY = 0;
   window.vandeBoostManualControl = false;
@@ -444,14 +445,13 @@ window.rand = function(min, max) { return min + Math.random() * (max - min); }
 window.awardPipeScore = function(pipe) {
   if (pipe.passed) return;
   pipe.passed = true;
-  window.score++;
+  const previousMilestone = Math.floor(window.score / 50);
+  const points = window.systumHackTimer > 0 ? window.systumHackMultiplier : 1;
+  window.score += points;
   window.hudScoreEl.textContent = window.score;
   window.spawnCoinBurst();
-  if (window.systumHackTimer > 0) {
-    window.systumBonusCoins += Math.floor(window.COINS_PER_POINT) * (window.systumHackMultiplier - 1);
-  }
   if (window.vandeBoostTimer > 0 && window.vandePipesRemaining > 0) window.vandePipesRemaining--;
-  if (window.score > 0 && window.score % 50 === 0) {
+  if (Math.floor(window.score / 50) > previousMilestone) {
     window.playSound(window.audioWahModijiWah);
     window.spawnCoinBurst();
     window.spawnLotusRain();
@@ -624,14 +624,10 @@ window.update = function(dt) {
     if (c.x < -120 || c.x > window.W + 120) { window.cockroaches.splice(i, 1); continue; }
     const cy = c.y + Math.sin(c.bob) * 8;
     if (window.circleCircleCollision(window.bird, { x: c.x, y: cy, r: c.size * 0.34 })) {
-      if (window.pappuHamzaTimer > 0) {
+      if (skillInvulnerable) {
         c.burning = { elapsed: 0 };
         window.playSound(window.audioPappuBurn);
         window.spawnPappuImpact(c.x, cy);
-        continue;
-      }
-      if (skillInvulnerable) {
-        window.cockroaches.splice(i, 1);
         continue;
       }
       if (window.save.hits > 0) {
@@ -726,7 +722,7 @@ window.calculateCoins = function(score) {
 };
 
 window.finalizeGameOver = function() {
-  const earned = window.calculateCoins(window.score) + window.systumBonusCoins;
+  const earned = window.calculateCoins(window.score);
   window.save.coins += earned;
   if (window.score > window.save.bestScore) window.save.bestScore = window.score;
   window.saveGameState();
@@ -1047,8 +1043,16 @@ window.init = async function() {
     }
   });
   document.addEventListener("pointerdown", window.onInputStart, { passive: false });
-  document.addEventListener("touchstart", window.onInputStart, { passive: false });
-  document.addEventListener("mousedown", window.onInputStart);
+  const bindSkillButton = (button, activate) => {
+    button.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      activate();
+    });
+    button.addEventListener("click", (e) => {
+      if (e.detail === 0) activate();
+    });
+  };
 
   window.pauseBtn.addEventListener("click", () => {
     if (window.state !== "playing") return;
@@ -1056,9 +1060,9 @@ window.init = async function() {
     window.pauseOverlay.classList.remove("hidden");
     window.audioBgm.pause();
   });
-  window.systumSkillBtn.addEventListener("click", window.activateSystumHack);
-  window.vandeSkillBtn.addEventListener("click", window.activateVandeBoost);
-  window.pappuSkillBtn.addEventListener("click", window.activatePappuHamza);
+  bindSkillButton(window.systumSkillBtn, window.activateSystumHack);
+  bindSkillButton(window.vandeSkillBtn, window.activateVandeBoost);
+  bindSkillButton(window.pappuSkillBtn, window.activatePappuHamza);
   window.resumeBtn.addEventListener("click", () => {
     window.playTap(); window.state = "playing";
     window.pauseOverlay.classList.add("hidden");
