@@ -56,6 +56,7 @@ window.GAME_CONFIG = {
   MELODY_SIZE: 40,
   MELODY_SPEED: 150,
   COINS_PER_POINT: 1,
+  SKILL_COOLDOWN_DURATION: 10,
   SYSTUM_HACK_DURATION: 15,
   VANDE_BOOST_DURATION: 10,
   VANDE_BOOST_FLOAT_DURATION: 6,
@@ -81,10 +82,10 @@ window.STORE_ITEMS = {
 };
 
 window.STORE_PRODUCTS = [
+  { id: "melody-namo-edition", name: "Melody NAMO Edition", image: "images/melody pack namo edition.png", price: 100, currency: "coins", rouletteMode: "namo" },
   { id: "systum-hack", name: "Systum Hack", image: "images/system hack.png", price: 5, currency: "melodies", skillKey: "systumHack" },
   { id: "vande-boost", name: "Vande Boost", image: "images/vande boost.png", price: 10, currency: "melodies", skillKey: "vandeBoost" },
   { id: "pappu-hamza", name: "Pappu Hamza", image: "images/pappu hamza.png", price: 15, currency: "melodies", skillKey: "pappuHamza" },
-  { id: "melody-namo-edition", name: "Melody NAMO Edition", image: "images/melody pack namo edition.png", price: 100, currency: "coins", rouletteMode: "namo" },
 ];
 
 // Roulette prizes
@@ -98,11 +99,11 @@ window.ROULETTE_PRIZES = [
 ];
 
 window.NAMO_ROULETTE_PRIZES = [
-  { id: 1, label: "5 Melodies + 1 Each Skill", icon: "images/melody new1.png", type: "bundle", melodies: 5, skills: { systumHack: 1, vandeBoost: 1, pappuHamza: 1 }, chance: 0.2 },
-  { id: 2, label: "10 Melodies + 2/2/1 Skills", icon: "images/melody new2.png", type: "bundle", melodies: 10, skills: { systumHack: 2, vandeBoost: 2, pappuHamza: 1 }, chance: 0.2 },
-  { id: 3, label: "10 Melodies + 4/3/2 Skills", icon: "images/melody new1.png", type: "bundle", melodies: 10, skills: { systumHack: 4, vandeBoost: 3, pappuHamza: 2 }, chance: 0.2 },
-  { id: 4, label: "15 Melodies + 5/4/3 Skills", icon: "images/melody new2.png", type: "bundle", melodies: 15, skills: { systumHack: 5, vandeBoost: 4, pappuHamza: 3 }, chance: 0.2 },
-  { id: 5, label: "15 Melodies + 5 Each Skill", icon: "images/melody pack namo edition.png", type: "bundle", melodies: 15, skills: { systumHack: 5, vandeBoost: 5, pappuHamza: 5 }, chance: 0.2 },
+  { id: 1, label: "3 Melodies + 5 Each Skill", icon: "images/melody new1.png", type: "bundle", melodies: 3, skills: { systumHack: 5, vandeBoost: 5, pappuHamza: 5 }, chance: 0.2 },
+  { id: 2, label: "5 Melodies + 4 Each Skill", icon: "images/melody new2.png", type: "bundle", melodies: 5, skills: { systumHack: 4, vandeBoost: 4, pappuHamza: 4 }, chance: 0.2 },
+  { id: 3, label: "7 Melodies + 3 Each Skill", icon: "images/melody new1.png", type: "bundle", melodies: 7, skills: { systumHack: 3, vandeBoost: 3, pappuHamza: 3 }, chance: 0.2 },
+  { id: 4, label: "10 Melodies + 2 Each Skill", icon: "images/melody new2.png", type: "bundle", melodies: 10, skills: { systumHack: 2, vandeBoost: 2, pappuHamza: 2 }, chance: 0.2 },
+  { id: 5, label: "15 Melodies + 1 Each Skill", icon: "images/melody pack namo edition.png", type: "bundle", melodies: 15, skills: { systumHack: 1, vandeBoost: 1, pappuHamza: 1 }, chance: 0.2 },
 ];
 
 // Default save data
