@@ -21,12 +21,15 @@ window.cockroachSoundToggle = false;
 window.respawnTimerId = null;
 window.respawnTimeLeft = 5;
 window.systumHackTimer = 0;
+window.systumHackCooldown = 0;
 window.systumHackMultiplier = 1;
 window.vandeBoostTimer = 0;
+window.vandeBoostCooldown = 0;
 window.vandePipesRemaining = 0;
 window.vandeBoostFloatY = 0;
 window.vandeBoostManualControl = false;
 window.pappuHamzaTimer = 0;
+window.pappuHamzaCooldown = 0;
 window.pappuFireCooldown = 0;
 window.pappuProjectiles = [];
 window.pappuEffects = [];
@@ -186,7 +189,7 @@ window.getVandeBoostSpeedMultiplier = function() {
 
 window.activatePappuHamza = function() {
   const charges = window.save.skillCharges;
-  if (window.state !== "playing" || window.pappuHamzaTimer > 0 || !charges || charges.pappuHamza < 1) return;
+  if (window.state !== "playing" || window.pappuHamzaTimer > 0 || window.pappuHamzaCooldown > 0 || !charges || charges.pappuHamza < 1) return;
   charges.pappuHamza--;
   window.pappuHamzaTimer = window.GAME_CONFIG.PAPPU_HAMZA_DURATION;
   window.pappuFireCooldown = 0;
@@ -346,19 +349,25 @@ window.updateSkillButtons = function() {
   const systumActive = window.systumHackTimer > 0;
   const vandeActive = window.vandeBoostTimer > 0;
   const pappuActive = window.pappuHamzaTimer > 0;
-  const updateTimer = (button, timerElement, remaining, duration) => {
+  const systumCoolingDown = window.systumHackCooldown > 0;
+  const vandeCoolingDown = window.vandeBoostCooldown > 0;
+  const pappuCoolingDown = window.pappuHamzaCooldown > 0;
+  const updateTimer = (button, timerElement, remaining, cooldownRemaining, cooldownDuration) => {
     const timerText = remaining > 0 ? `${Math.ceil(remaining)}s` : "";
     if (timerElement.textContent !== timerText) timerElement.textContent = timerText;
     button.classList.toggle("active", remaining > 0);
-    const sweepAngle = duration > 0 ? Math.max(0, Math.min(1, remaining / duration)) * 360 : 0;
+    button.classList.toggle("cooldown", cooldownRemaining > 0);
+    const sweepAngle = cooldownDuration > 0
+      ? Math.max(0, Math.min(1, cooldownRemaining / cooldownDuration)) * 360
+      : 0;
     button.style.setProperty("--skill-sweep-angle", `${sweepAngle}deg`);
   };
-  updateTimer(window.systumSkillBtn, window.systumSkillTimerEl, window.systumHackTimer, window.GAME_CONFIG.SYSTUM_HACK_DURATION);
-  updateTimer(window.vandeSkillBtn, window.vandeSkillTimerEl, window.vandeBoostTimer, window.GAME_CONFIG.VANDE_BOOST_DURATION);
-  updateTimer(window.pappuSkillBtn, window.pappuSkillTimerEl, window.pappuHamzaTimer, window.GAME_CONFIG.PAPPU_HAMZA_DURATION);
-  const systumDisabled = window.state !== "playing" || (!systumActive && !(charges.systumHack > 0));
-  const vandeDisabled = window.state !== "playing" || (!vandeActive && !(charges.vandeBoost > 0));
-  const pappuDisabled = window.state !== "playing" || (!pappuActive && !(charges.pappuHamza > 0));
+  updateTimer(window.systumSkillBtn, window.systumSkillTimerEl, window.systumHackTimer, window.systumHackCooldown, window.GAME_CONFIG.SKILL_COOLDOWN_DURATION);
+  updateTimer(window.vandeSkillBtn, window.vandeSkillTimerEl, window.vandeBoostTimer, window.vandeBoostCooldown, window.GAME_CONFIG.SKILL_COOLDOWN_DURATION);
+  updateTimer(window.pappuSkillBtn, window.pappuSkillTimerEl, window.pappuHamzaTimer, window.pappuHamzaCooldown, window.GAME_CONFIG.SKILL_COOLDOWN_DURATION);
+  const systumDisabled = window.state !== "playing" || systumCoolingDown || (!systumActive && !(charges.systumHack > 0));
+  const vandeDisabled = window.state !== "playing" || vandeCoolingDown || (!vandeActive && !(charges.vandeBoost > 0));
+  const pappuDisabled = window.state !== "playing" || pappuCoolingDown || (!pappuActive && !(charges.pappuHamza > 0));
   if (window.systumSkillBtn.disabled !== systumDisabled) window.systumSkillBtn.disabled = systumDisabled;
   if (window.vandeSkillBtn.disabled !== vandeDisabled) window.vandeSkillBtn.disabled = vandeDisabled;
   if (window.pappuSkillBtn.disabled !== pappuDisabled) window.pappuSkillBtn.disabled = pappuDisabled;
@@ -366,7 +375,7 @@ window.updateSkillButtons = function() {
 
 window.activateSystumHack = function() {
   const charges = window.save.skillCharges;
-  if (window.state !== "playing" || window.systumHackTimer > 0 || !charges || charges.systumHack < 1) return;
+  if (window.state !== "playing" || window.systumHackTimer > 0 || window.systumHackCooldown > 0 || !charges || charges.systumHack < 1) return;
   charges.systumHack--;
   window.systumHackMultiplier = Math.random() < 0.5 ? 2 : 3;
   window.systumHackTimer = window.GAME_CONFIG.SYSTUM_HACK_DURATION;
@@ -377,7 +386,7 @@ window.activateSystumHack = function() {
 
 window.activateVandeBoost = function() {
   const charges = window.save.skillCharges;
-  if (window.state !== "playing" || window.vandeBoostTimer > 0 || !charges || charges.vandeBoost < 1) return;
+  if (window.state !== "playing" || window.vandeBoostTimer > 0 || window.vandeBoostCooldown > 0 || !charges || charges.vandeBoost < 1) return;
   charges.vandeBoost--;
   window.vandeBoostTimer = window.GAME_CONFIG.VANDE_BOOST_DURATION;
   window.vandeBoostFloatY = window.bird.y;
@@ -415,11 +424,11 @@ window.startNewGame = function() {
   window.melonTimer = window.rand(window.MELON_INTERVAL_MIN, window.MELON_INTERVAL_MAX);
   window.melodyTimer = window.rand(window.MELODY_INTERVAL_MIN, window.MELODY_INTERVAL_MAX);
   window.melodiesThisRun = 0; window.respawnCount = 0; window.groundOffset = 0;
-  window.systumHackTimer = 0; window.systumHackMultiplier = 1;
-  window.vandeBoostTimer = 0; window.vandePipesRemaining = 0;
+  window.systumHackTimer = 0; window.systumHackCooldown = 0; window.systumHackMultiplier = 1;
+  window.vandeBoostTimer = 0; window.vandeBoostCooldown = 0; window.vandePipesRemaining = 0;
   window.vandeBoostFloatY = 0;
   window.vandeBoostManualControl = false;
-  window.pappuHamzaTimer = 0; window.pappuFireCooldown = 0;
+  window.pappuHamzaTimer = 0; window.pappuHamzaCooldown = 0; window.pappuFireCooldown = 0;
   window.pappuProjectiles = []; window.pappuEffects = [];
 
   window.state = "ready";
@@ -511,16 +520,40 @@ window.update = function(dt) {
   window.updateSkillButtons();
   if (window.state !== "playing") return;
 
+  let systumJustEnded = false;
+  let vandeJustEnded = false;
+  let pappuJustEnded = false;
   if (window.systumHackTimer > 0) {
     window.systumHackTimer = Math.max(0, window.systumHackTimer - dt);
-    if (window.systumHackTimer === 0) window.systumHackMultiplier = 1;
+    if (window.systumHackTimer === 0) {
+      window.systumHackMultiplier = 1;
+      window.systumHackCooldown = window.GAME_CONFIG.SKILL_COOLDOWN_DURATION;
+      systumJustEnded = true;
+    }
   }
   if (window.vandeBoostTimer > 0) {
     window.vandeBoostTimer = Math.max(0, window.vandeBoostTimer - dt);
-    if (window.vandeBoostTimer === 0) window.vandePipesRemaining = 0;
+    if (window.vandeBoostTimer === 0) {
+      window.vandePipesRemaining = 0;
+      window.vandeBoostCooldown = window.GAME_CONFIG.SKILL_COOLDOWN_DURATION;
+      vandeJustEnded = true;
+    }
   }
   if (window.pappuHamzaTimer > 0) {
     window.pappuHamzaTimer = Math.max(0, window.pappuHamzaTimer - dt);
+    if (window.pappuHamzaTimer === 0) {
+      window.pappuHamzaCooldown = window.GAME_CONFIG.SKILL_COOLDOWN_DURATION;
+      pappuJustEnded = true;
+    }
+  }
+  if (!systumJustEnded && window.systumHackCooldown > 0) {
+    window.systumHackCooldown = Math.max(0, window.systumHackCooldown - dt);
+  }
+  if (!vandeJustEnded && window.vandeBoostCooldown > 0) {
+    window.vandeBoostCooldown = Math.max(0, window.vandeBoostCooldown - dt);
+  }
+  if (!pappuJustEnded && window.pappuHamzaCooldown > 0) {
+    window.pappuHamzaCooldown = Math.max(0, window.pappuHamzaCooldown - dt);
   }
   window.updatePappuHamza(dt);
 
@@ -563,7 +596,8 @@ window.update = function(dt) {
 
   // Pipes
   const boostActive = window.vandeBoostTimer > 0;
-  const skillInvulnerable = boostActive || window.systumHackTimer > 0 || window.pappuHamzaTimer > 0;
+  const skillInvulnerable = boostActive || window.pappuHamzaTimer > 0;
+  const cockroachKillActive = boostActive || window.systumHackTimer > 0 || window.pappuHamzaTimer > 0;
   const surgeActive = boostActive;
   const speed = (window.PIPE_SPEED + Math.min(window.score * 2.5, 90)) *
     (surgeActive ? window.getVandeBoostSpeedMultiplier() : 1);
@@ -624,7 +658,7 @@ window.update = function(dt) {
     if (c.x < -120 || c.x > window.W + 120) { window.cockroaches.splice(i, 1); continue; }
     const cy = c.y + Math.sin(c.bob) * 8;
     if (window.circleCircleCollision(window.bird, { x: c.x, y: cy, r: c.size * 0.34 })) {
-      if (skillInvulnerable) {
+      if (cockroachKillActive) {
         c.burning = { elapsed: 0 };
         window.playSound(window.audioPappuBurn);
         window.spawnPappuImpact(c.x, cy);

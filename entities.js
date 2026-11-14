@@ -548,6 +548,47 @@ function drawEgyptianPipeSegment(x, y, w, h, c1, c2, isTop) {
     }
   }
 
+  const flatTop = isTop ? friezeBottom : bandY;
+  const flatBottom = isTop ? bandY + bandHeight : friezeTop;
+  const flatHeight = flatBottom - flatTop;
+  if (flatHeight > 6) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(capX + 1, flatTop, capW - 2, flatHeight);
+    ctx.clip();
+
+    const tileCount = Math.max(2, Math.floor(capW / 22));
+    const tileWidth = capW / tileCount;
+    const motifY = flatTop + flatHeight / 2;
+    ctx.strokeStyle = "rgba(112, 59, 31, 0.62)";
+    ctx.lineWidth = 0.8;
+    for (let tile = 0; tile <= tileCount; tile++) {
+      const tileX = capX + tile * tileWidth;
+      ctx.beginPath();
+      ctx.moveTo(tileX, flatTop + 2);
+      ctx.lineTo(tileX, flatBottom - 2);
+      ctx.stroke();
+    }
+
+    for (let tile = 0; tile < tileCount; tile++) {
+      const motifX = capX + (tile + 0.5) * tileWidth;
+      const halfWidth = Math.min(3.2, tileWidth * 0.18);
+      const halfHeight = Math.min(5, flatHeight * 0.26);
+      ctx.fillStyle = tile % 2 === 0 ? "#315078" : "#236c69";
+      ctx.strokeStyle = "#ffe4a0";
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(motifX, motifY - halfHeight);
+      ctx.lineTo(motifX + halfWidth, motifY);
+      ctx.lineTo(motifX, motifY + halfHeight);
+      ctx.lineTo(motifX - halfWidth, motifY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   ctx.strokeStyle = "#ffe4a0";
   ctx.lineWidth = 2;
   const trimY = isTop ? bandY + bandHeight - 3 : bandY + 3;
@@ -1310,8 +1351,55 @@ window.drawHitShield = function() {
 
   const skillTimers = [window.systumHackTimer, window.vandeBoostTimer, window.pappuHamzaTimer].filter(timer => timer > 0);
   const skillActive = skillTimers.length > 0;
+  const vandeActive = window.vandeBoostTimer > 0;
+  const pappuActive = window.pappuHamzaTimer > 0;
   const hitShieldActive = bird.shieldTimer > 0;
   if (!skillActive && !hitShieldActive) return;
+
+  const skillPalettes = {
+    day: {
+      systum: { main: "#ff9933", light: "#ffe0b2" },
+      vande: { main: "#be185d", light: "#f9a8d4" },
+      pappu: { main: "#b91c1c", light: "#fecaca" },
+    },
+    night: {
+      systum: { main: "#facc15", light: "#fef08a" },
+      vande: { main: "#22d3ee", light: "#cffafe" },
+      pappu: { main: "#f472b6", light: "#fce7f3" },
+    },
+    desert: {
+      systum: { main: "#1d4ed8", light: "#bfdbfe" },
+      vande: { main: "#6b21a8", light: "#e9d5ff" },
+      pappu: { main: "#065f46", light: "#a7f3d0" },
+    },
+    ocean: {
+      systum: { main: "#ff9933", light: "#ffe0b2" },
+      vande: { main: "#6d28d9", light: "#ddd6fe" },
+      pappu: { main: "#be123c", light: "#fda4af" },
+    },
+    diwali: {
+      systum: { main: "#22d3ee", light: "#cffafe" },
+      vande: { main: "#f472b6", light: "#fce7f3" },
+      pappu: { main: "#a3e635", light: "#ecfccb" },
+    },
+    independence: {
+      systum: { main: "#7e22ce", light: "#e9d5ff" },
+      vande: { main: "#be123c", light: "#fda4af" },
+      pappu: { main: "#1d4ed8", light: "#bfdbfe" },
+    },
+  };
+  const themeId = window.app ? window.app.getAttribute("data-theme") : "day";
+  const skillPalette = skillPalettes[themeId] || skillPalettes.day;
+  const skillOutlineColor = ["day", "desert", "ocean"].includes(themeId)
+    ? "rgba(255, 255, 255, 0.96)"
+    : "rgba(15, 23, 42, 0.88)";
+  const systumColors = skillActive
+    ? skillPalette.systum
+    : { main: "#ff9933", light: "#ffe8b7" };
+  const withAlpha = (hex, alpha) => {
+    const color = parseInt(hex.slice(1), 16);
+    return `rgba(${(color >> 16) & 255}, ${(color >> 8) & 255}, ${color & 255}, ${alpha})`;
+  };
 
   const warning = skillTimers.some(timer => timer <= 3);
   const blinkVisible = !warning || Math.floor(window.elapsed * 8) % 2 === 0;
@@ -1324,14 +1412,138 @@ window.drawHitShield = function() {
   ctx.globalAlpha = fade;
   if (skillActive) {
     const shieldRadius = bird.size * 0.96 * pulse;
+    if (vandeActive) {
+      const colors = skillPalette.vande;
+      const rocketPulse = 1 + Math.sin(window.elapsed * 18) * 0.045;
+      const rocketRadius = bird.size * 1.02 * rocketPulse;
+      const glow = ctx.createRadialGradient(0, 0, bird.size * 0.16, 0, 0, rocketRadius * 1.35);
+      glow.addColorStop(0, withAlpha(colors.light, 0.2));
+      glow.addColorStop(0.65, withAlpha(colors.main, 0.13));
+      glow.addColorStop(1, withAlpha(colors.main, 0));
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rocketRadius * 1.24, rocketRadius * 0.88, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let trail = 0; trail < 5; trail++) {
+        const progress = (window.elapsed * 5 + trail * 0.2) % 1;
+        const startX = -rocketRadius * (0.25 + progress * 1.2);
+        const startY = (trail - 2) * rocketRadius * 0.16 + Math.sin(window.elapsed * 24 + trail) * 2;
+        ctx.globalAlpha = fade * (1 - progress) * 0.8;
+        ctx.strokeStyle = trail % 2 === 0 ? colors.main : colors.light;
+        ctx.lineWidth = 1.5 + (1 - progress) * 2;
+        ctx.shadowColor = colors.main;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(startX - rocketRadius * (0.18 + progress * 0.35), startY);
+        ctx.lineTo(startX, startY);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = fade;
+      ctx.shadowBlur = 0;
+
+      ctx.beginPath();
+      ctx.moveTo(rocketRadius * 1.2, 0);
+      ctx.lineTo(rocketRadius * 0.42, -rocketRadius * 0.58);
+      ctx.lineTo(rocketRadius * 0.12, -rocketRadius * 0.42);
+      ctx.lineTo(-rocketRadius * 0.72, -rocketRadius * 0.5);
+      ctx.lineTo(-rocketRadius * 0.55, -rocketRadius * 0.12);
+      ctx.lineTo(-rocketRadius * 0.92, 0);
+      ctx.lineTo(-rocketRadius * 0.55, rocketRadius * 0.12);
+      ctx.lineTo(-rocketRadius * 0.72, rocketRadius * 0.5);
+      ctx.lineTo(rocketRadius * 0.12, rocketRadius * 0.42);
+      ctx.lineTo(rocketRadius * 0.42, rocketRadius * 0.58);
+      ctx.closePath();
+      const rocketShield = ctx.createLinearGradient(-rocketRadius, 0, rocketRadius, 0);
+      rocketShield.addColorStop(0, withAlpha(colors.main, 0.12));
+      rocketShield.addColorStop(0.62, withAlpha(colors.main, 0.18));
+      rocketShield.addColorStop(1, withAlpha(colors.light, 0.32));
+      ctx.fillStyle = rocketShield;
+      ctx.strokeStyle = skillOutlineColor;
+      ctx.lineWidth = 5;
+      ctx.shadowColor = colors.main;
+      ctx.shadowBlur = 18;
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = colors.light;
+      ctx.lineWidth = 2.4;
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+      return;
+    }
+
+    if (pappuActive) {
+      const colors = skillPalette.pappu;
+      const pappuPulse = 1 + Math.sin(window.elapsed * 13) * 0.08;
+      const pappuRadius = bird.size * 1.02 * pappuPulse;
+      const glow = ctx.createRadialGradient(0, 0, bird.size * 0.18, 0, 0, pappuRadius * 1.2);
+      glow.addColorStop(0, withAlpha(colors.light, 0.2));
+      glow.addColorStop(0.68, withAlpha(colors.main, 0.14));
+      glow.addColorStop(1, withAlpha(colors.main, 0));
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, pappuRadius, pappuRadius * 1.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.rotate(window.elapsed * 1.8);
+      ctx.beginPath();
+      for (let point = 0; point < 12; point++) {
+        const angle = point * Math.PI / 6;
+        const pointRadius = pappuRadius * (point % 2 === 0 ? 1 : 0.88);
+        const x = Math.cos(angle) * pointRadius;
+        const y = Math.sin(angle) * pointRadius * 1.08;
+        if (point === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = skillOutlineColor;
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.strokeStyle = colors.light;
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = colors.main;
+      ctx.shadowBlur = 17;
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.rotate(-window.elapsed * 2.6);
+      ctx.setLineDash([5, 9]);
+      ctx.lineDashOffset = -window.elapsed * 20;
+      ctx.strokeStyle = colors.light;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = colors.main;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, pappuRadius * 0.82, pappuRadius * 0.9, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
+      for (let spark = 0; spark < 6; spark++) {
+        const angle = spark * Math.PI / 3;
+        const x = Math.cos(angle) * pappuRadius * 0.82;
+        const y = Math.sin(angle) * pappuRadius * 0.9;
+        ctx.fillStyle = spark % 2 === 0 ? "#ffffff" : colors.light;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.6 + Math.sin(window.elapsed * 12 + spark) * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
+
     const shell = ctx.createRadialGradient(
       -bird.size * 0.2, -bird.size * 0.28, bird.size * 0.08,
       0, 0, shieldRadius * 1.2
     );
-    shell.addColorStop(0, "rgba(255, 246, 220, 0.2)");
-    shell.addColorStop(0.58, "rgba(255, 168, 61, 0.1)");
-    shell.addColorStop(0.9, "rgba(255, 141, 38, 0.2)");
-    shell.addColorStop(1, "rgba(255, 141, 38, 0)");
+    shell.addColorStop(0, withAlpha(systumColors.light, 0.2));
+    shell.addColorStop(0.58, withAlpha(systumColors.main, 0.1));
+    shell.addColorStop(0.9, withAlpha(systumColors.main, 0.2));
+    shell.addColorStop(1, withAlpha(systumColors.main, 0));
     ctx.fillStyle = shell;
     ctx.beginPath();
     ctx.ellipse(0, 0, shieldRadius, shieldRadius * 1.12, 0, 0, Math.PI * 2);
@@ -1346,18 +1558,21 @@ window.drawHitShield = function() {
     ctx.bezierCurveTo(-shieldRadius * 1.05, -shieldRadius * 0.48, -shieldRadius * 0.7, -shieldRadius * 0.96, 0, -shieldRadius);
     ctx.closePath();
     const edge = ctx.createLinearGradient(-shieldRadius, -shieldRadius, shieldRadius, shieldRadius);
-    edge.addColorStop(0, "rgba(255, 239, 191, 0.96)");
-    edge.addColorStop(0.48, "rgba(255, 153, 51, 0.86)");
-    edge.addColorStop(1, "rgba(255, 221, 158, 0.96)");
+    edge.addColorStop(0, systumColors.light);
+    edge.addColorStop(0.48, systumColors.main);
+    edge.addColorStop(1, systumColors.light);
+    ctx.strokeStyle = skillOutlineColor;
+    ctx.lineWidth = 4.5;
+    ctx.stroke();
     ctx.strokeStyle = edge;
     ctx.lineWidth = 2.2;
-    ctx.shadowColor = "#ffae50";
+    ctx.shadowColor = systumColors.main;
     ctx.shadowBlur = 18;
     ctx.stroke();
     ctx.shadowBlur = 0;
     ctx.restore();
 
-    ctx.strokeStyle = "rgba(255, 232, 183, 0.62)";
+    ctx.strokeStyle = withAlpha(systumColors.light, 0.72);
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.ellipse(0, 0, shieldRadius * 0.84, shieldRadius * 0.96, 0, -0.75, 0.75);
@@ -1368,8 +1583,8 @@ window.drawHitShield = function() {
       const angle = window.elapsed * 0.8 + node * Math.PI / 2;
       const nodeX = Math.cos(angle) * shieldRadius * 0.92;
       const nodeY = Math.sin(angle) * shieldRadius * 1.02;
-      ctx.fillStyle = "rgba(255, 245, 215, 0.96)";
-      ctx.shadowColor = "#ff9d3b";
+      ctx.fillStyle = systumColors.light;
+      ctx.shadowColor = systumColors.main;
       ctx.shadowBlur = 12;
       ctx.beginPath();
       ctx.arc(nodeX, nodeY, 2.2, 0, Math.PI * 2);
@@ -1395,11 +1610,11 @@ window.drawHitShield = function() {
       ctx.rotate((petal + offset) * Math.PI * 2 / count);
       ctx.translate(0, -radius);
       const gradient = ctx.createLinearGradient(0, 0, 0, -length);
-      gradient.addColorStop(0, `rgba(255, 153, 51, ${opacity * 0.48})`);
-      gradient.addColorStop(0.55, `rgba(255, 174, 76, ${opacity})`);
-      gradient.addColorStop(1, `rgba(255, 211, 132, ${opacity * 0.82})`);
+      gradient.addColorStop(0, withAlpha(systumColors.main, opacity * 0.48));
+      gradient.addColorStop(0.55, withAlpha(systumColors.main, opacity));
+      gradient.addColorStop(1, withAlpha(systumColors.light, opacity * 0.82));
       ctx.fillStyle = gradient;
-      ctx.strokeStyle = `rgba(255, 191, 105, ${opacity * 0.9})`;
+      ctx.strokeStyle = withAlpha(systumColors.main, opacity * 0.9);
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(-width * 0.48, 0);
@@ -1408,7 +1623,7 @@ window.drawHitShield = function() {
       ctx.quadraticCurveTo(0, width * 0.18, -width * 0.48, 0);
       ctx.fill();
       ctx.stroke();
-      ctx.strokeStyle = `rgba(255, 235, 195, ${opacity * 0.72})`;
+      ctx.strokeStyle = withAlpha(systumColors.light, opacity * 0.82);
       ctx.lineWidth = 0.8;
       ctx.beginPath();
       ctx.moveTo(0, -width * 0.04);
@@ -1422,8 +1637,8 @@ window.drawHitShield = function() {
   drawPetalRing(8, 0.5, bird.size * (skillActive ? 0.42 : 0.34) * pulse, bird.size * 0.2 * pulse, skillActive ? 0.76 : 0.52);
 
   const centerGlow = ctx.createRadialGradient(0, 0, 1, 0, 0, bird.size * 0.3);
-  centerGlow.addColorStop(0, "rgba(255, 197, 112, 0.28)");
-  centerGlow.addColorStop(1, "rgba(255, 153, 51, 0)");
+  centerGlow.addColorStop(0, withAlpha(systumColors.light, 0.28));
+  centerGlow.addColorStop(1, withAlpha(systumColors.main, 0));
   ctx.fillStyle = centerGlow;
   ctx.beginPath();
   ctx.arc(0, 0, bird.size * 0.3, 0, Math.PI * 2);

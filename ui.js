@@ -75,9 +75,9 @@ window.renderStore = function() {
     const charges = isSkill ? (save.skillCharges[item.skillKey] || 0) : 0;
     const balance = save[item.currency];
     const description = item.skillKey === "systumHack"
-      ? "15 seconds: invulnerability and 2×/3× pipe coins and melody pickups"
+      ? "15 seconds: 2X or 3X points, coin earnings, and melodies. Fries cockroaches on contact; dodge pipes manually"
       : item.skillKey === "vandeBoost"
-        ? "10 seconds: 6s auto-float, then descend; tap to take control · 4×/3×/2× speed"
+        ? "10 seconds: 6s auto-float, then descend; tap to take control · 4X/3X/2X speed"
         : item.skillKey === "pappuHamza"
           ? "10 seconds: auto-fires at pipes and cockroaches, burning pests and clearing the path"
         : isSkill
@@ -168,8 +168,6 @@ window.renderStore = function() {
   });
   window.storeListEl.appendChild(hitCard);
 
-  normalStoreProducts.forEach(renderProductCard);
-
   // Melody Pack item
   const packCard = document.createElement("div");
   packCard.className = "store-card";
@@ -199,6 +197,9 @@ window.renderStore = function() {
   window.storeListEl.appendChild(packCard);
 
   melodyStoreProducts.forEach(renderProductCard);
+
+  // Keep the three skill purchases last.
+  normalStoreProducts.forEach(renderProductCard);
 }
 
 window.renderSongs = function() {
